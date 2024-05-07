@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(ct_vis)
 
-
+set(CMAKE_CXX_STANDARD 20)
 
 set(THIRDPARTY_HEADERS
 
@@ -27,17 +27,38 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 						   ${CMAKE_CURRENT_LIST_DIR}/include/
+
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/config/include/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/ofstd/include/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/oflog/include/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/dcmimgle/include/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/dcmdata/include/   
 )
 
-#target_link_libraries(${PROJECT_NAME}
-#
-#)
+target_link_libraries(${PROJECT_NAME}
+					  ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/dcmimgle.lib
+					  ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/dcmdata.lib
+					  ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/ofstd.lib
+					  ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/oflog.lib
+)
 
 
 # Parallel compilation and C++17
 if(MSVC)
-target_compile_options(${PROJECT_NAME} PRIVATE /std:c++latest /MP /W4 /wd4554 /WX)
+target_compile_options(${PROJECT_NAME} PRIVATE "/Zc:__cplusplus")
+target_compile_options(${PROJECT_NAME} PRIVATE /std:c++20 /MP /W4 /wd4554 /WX)
 endif(MSVC)
+
+if(WIN32)
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/bin/$<CONFIG>/dcmimgle.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/bin/$<CONFIG>/dcmdata.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/bin/$<CONFIG>/ofstd.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/bin/$<CONFIG>/oflog.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/bin/$<CONFIG>/oficonv.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		VERBATIM
+	)
+endif(WIN32)
 
 
 # Clang format setup
