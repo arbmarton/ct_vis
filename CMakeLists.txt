@@ -14,6 +14,7 @@ set(THIRDPARTY_SOURCES
 set(HEADER_FILES
 	include/BasicDraw.h
 	include/ImageLoader.h
+	include/ImageSet.h
 	include/Test.h
 )
 

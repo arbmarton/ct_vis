@@ -1,18 +1,15 @@
 #pragma once
 
-#include <string>
-#include <filesystem>
-#include <vector>
-#include <memory>
+#include "ImageSet.h"
 
-class DicomImage;
+#include <filesystem>
 
 class ImageLoader
 {
 public:
     ImageLoader(const std::filesystem::path& folderPath, const uint32_t maxThreads = 0);
 
-    std::vector<std::unique_ptr<DicomImage>> load() const;
+    ImageSet load() const;
 
 private:
     const std::filesystem::path m_Folder;

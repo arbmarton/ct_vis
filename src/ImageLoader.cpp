@@ -11,10 +11,11 @@ ImageLoader::ImageLoader(const std::filesystem::path& folderPath, const uint32_t
 {
 }
 
-std::vector<std::unique_ptr<DicomImage>> ImageLoader::load() const
+ImageSet ImageLoader::load() const
 {
-    std::vector<std::unique_ptr<DicomImage>> ret;
-    std::mutex mutex;
+    ImageSet ret;
+    std::mutex dicomImageMutex;
+    std::mutex pixelDataMutex;
 
     std::vector<std::filesystem::path> dicomDirectoryEntries;
     for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(m_Folder))
@@ -27,15 +28,29 @@ std::vector<std::unique_ptr<DicomImage>> ImageLoader::load() const
 
         dicomDirectoryEntries.push_back(currentPath);
     }
+    ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
 
     const auto threadLambda = [&](const uint32_t threadID) {
         for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += m_MaxThreads)
         {
             const auto currentPath = dicomDirectoryEntries[iter];
             auto img = std::make_unique<DicomImage>(currentPath.string().c_str());
+            if (!img->isMonochrome())
+            {
+                throw 0;
+            }
+            img->setMinMaxWindow();
+            const uint8_t* pixelData = static_cast<const uint8_t*>(img->getOutputData(8));
 
-            std::lock_guard<std::mutex> guard(mutex);
-            ret.push_back(std::move(img));
+            {
+                std::lock_guard<std::mutex> guard(pixelDataMutex);
+                memcpy(&ret.m_PixelData[512 * 512 * iter], pixelData, 512 * 512);
+            }
+
+            {
+                std::lock_guard<std::mutex> guard(dicomImageMutex);
+                ret.m_DicomImages.push_back(std::move(img));
+            }
         }
     };
 
