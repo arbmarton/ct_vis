@@ -1,19 +1,244 @@
-
 #include "dcmtk/dcmdata/dctk.h"
 #include "dcmtk/config/osconfig.h"
+#include "dcmtk/dcmimgle/dcmimage.h"
+
+#include "BasicDraw.h"
 
 #include <iostream>
+#include <string>
+#include <limits>
+
+
+#pragma warning(push)
+#pragma warning(disable : 4701)
 
 int main(int argc, char** argv)
 {
-	(void)argc;
-	(void)argv;
+    (void)argc;
+    (void)argv;
 
-	DcmFileFormat dcmFileFormat;
+    const std::string filename =
+        "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/1-001.dcm";
+    //"g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3N-02015/07-26-2010-NA-CT ABDOMEN W AND WO IV CONTRAST-02857/4.000000-LUNG  B70f-64700/1-12.dcm";
 
-	std::cout << __cplusplus;
+    DcmFileFormat dcmFileFormat;
+    OFCondition status = dcmFileFormat.loadFile(filename.c_str());
+    if (!status.good())
+    {
+        std::cerr << "Error: Unable to load DICOM file: " << status.text() << std::endl;
+        return 1;
+    }
 
-	std::cout << "test";
+    DcmDataset* dataset = dcmFileFormat.getDataset();
 
-	return 0;
+    OFString photometricInterpretation;
+    if (dataset->findAndGetOFString(DCM_PhotometricInterpretation, photometricInterpretation).good())
+    {
+        std::cout << "Photometric Interpretation: " << photometricInterpretation << std::endl;
+    }
+    else
+    {
+        std::cerr << "Error: Photometric Interpretation not found." << std::endl;
+    }
+
+    // Get the number of frames (if it's a multi-frame image)
+    Uint16 numberOfFrames;
+    if (dataset->findAndGetUint16(DCM_NumberOfFrames, numberOfFrames).good())
+    {
+        for (Uint16 frame = 0; frame < numberOfFrames; ++frame)
+        {
+            // Load the current frame
+            DicomImage* dcmImage = new DicomImage(filename.c_str(), dataset->getOriginalXfer(), CIF_MayDetachPixelData);
+            if (dcmImage != nullptr && dcmImage->getStatus() == EIS_Normal)
+            {
+                // Process the current frame
+                // Example: Access pixel data of the current frame
+                const Uint16* pixelData = (Uint16*)(dcmImage->getOutputData(16 /* bits per sample */, frame /* frame number */));
+                if (pixelData)
+                {
+                    // Process pixel data here
+                    std::cout << "Frame " << frame << ": Pixel data" << std::endl;
+                }
+                else
+                {
+                    std::cerr << "Error: Unable to get pixel data for frame " << frame << std::endl;
+                }
+
+                // Clean up
+                delete dcmImage;
+            }
+            else
+            {
+                std::cerr << "Error: Unable to load DICOM image for frame " << frame << std::endl;
+            }
+        }
+    }
+    else
+    {
+        // Single-frame DICOM image
+        // Load the DICOM image
+        DicomImage* dcmImage = new DicomImage(filename.c_str(), dataset->getOriginalXfer(), CIF_MayDetachPixelData);
+        if (dcmImage != nullptr && dcmImage->getStatus() == EIS_Normal)
+        {
+            std::uint16_t bitsAllocated;
+            std::uint16_t bitsStored;
+            std::uint16_t pixelRepresentation;
+            if (dataset->findAndGetUint16(DCM_BitsAllocated, bitsAllocated).good())
+            {
+                // Get the Bits Stored attribute
+                dataset->findAndGetUint16(DCM_BitsStored, bitsStored);
+
+                // Get the Pixel Representation attribute
+                dataset->findAndGetUint16(DCM_PixelRepresentation, pixelRepresentation);
+
+                // Calculate the number of bits per sample
+                unsigned int numberOfBits = bitsStored;
+                if (pixelRepresentation == 1)
+                {
+                    // If Pixel Representation is signed, add an extra bit for sign
+                    numberOfBits++;
+                }
+
+                // Use 'numberOfBits' as the parameter for DicomImage.getOutputData()
+            }
+            std::cout << "bitsAllocated: " << bitsAllocated << "\n";
+            std::cout << "bitsStored: " << bitsStored << "\n";
+            std::cout << "pixelRepresentation: " << pixelRepresentation << "\n";
+
+
+            double minValue;
+            double maxValue;
+            dcmImage->getMinMaxValues(minValue, maxValue, 1);
+            std::cout << "min value in image: " << minValue << "\n";
+            std::cout << "max value in image: " << maxValue << "\n";
+
+            //auto dfgdf = dcmImage->isMonochrome();
+            //std::cout << "depth: " << dfgdf << "\n";
+            //unsigned long dataSize = dcmImage->getWidth() * dcmImage->getHeight() * dcmImage->getDepth();
+            //
+            //// Allocate memory for pixel data
+            //Uint16* buffer = new Uint16[dataSize];
+            //
+            //dcmImage->setMinMaxWindow();
+            //// Get the pixel data
+            //if (dcmImage->getOutputData(buffer, dataSize, 16)) {
+            //    for (uint32_t i = 0; i < dcmImage->getWidth() * dcmImage->getHeight(); ++i) {
+            //        //if (buffer[i] < 0) {
+            //        //    throw 0;
+            //        //}
+            //        //std::cout << (int)buffer[i] << " ";
+            //    }
+            //    // Pixel data is now in 'buffer', you can process it accordingly
+            //}
+
+            const auto dgfgdfg = dcmImage->getInterData()->getRepresentation();
+            (void)dgfgdfg;
+
+            if (dcmImage->isMonochrome())
+            {
+                dcmImage->setMinMaxWindow();
+                //Sint16* pixelData = (Sint16*)(dcmImage->getOutputData(16 /* bits */));
+                Uint8* pixelData = (Uint8*)(dcmImage->getOutputData(8 /* bits */));
+                draw::drawCimgFromMonochromeData(512, 512, pixelData);
+                if (pixelData != nullptr)
+                {
+                    for (uint32_t i = 0; i < 512 * 512; ++i)
+                    {
+                        std::cout << (int)pixelData[i] << " ";
+                        //pixelData[i] = 12;
+                    }
+
+                    // Process 16-bit pixel data as needed
+                }
+            }
+
+            // Process the single frame
+            // Example: Access pixel data of the single frame
+            Uint16 rows;
+            Uint16 columns;
+            const Uint16* pixelData = (Uint16*)(dcmImage->getOutputData(16 /* bits per sample */, 0 /* frame number */));
+            std::uint16_t smallest = (std::numeric_limits<std::uint16_t>::max)();
+            std::uint16_t highest = std::numeric_limits<std::uint16_t>::lowest();
+            Float64 rescaleIntercept;
+            Float64 rescaleSlope;
+            if (dataset->findAndGetFloat64(DCM_RescaleIntercept, rescaleIntercept).good() && dataset->findAndGetFloat64(DCM_RescaleSlope, rescaleSlope).good())
+            {
+                std::cout << "Rescale Intercept: " << rescaleIntercept << std::endl;
+                std::cout << "Rescale Slope: " << rescaleSlope << std::endl;
+            }
+            else
+            {
+                std::cerr << "Error: Rescale Slope and/or Intercept not found." << std::endl;
+            }
+            OFString rescaleType;
+            if (dataset->findAndGetOFString(DCM_RescaleType, rescaleType).good())
+            {
+                std::cout << "Rescale Type: " << rescaleType << std::endl;
+            }
+            else
+            {
+                std::cerr << "Error: Rescale Type not found." << std::endl;
+            }
+
+            // Read the Window Center attribute
+            Float64 windowCenter;
+            if (dataset->findAndGetFloat64(DCM_WindowCenter, windowCenter).good())
+            {
+                std::cout << "Window Center: " << windowCenter << std::endl;
+            }
+            else
+            {
+                std::cerr << "Error: Window Center not found." << std::endl;
+            }
+
+            // Read the Window Width attribute
+            Float64 windowWidth;
+            if (dataset->findAndGetFloat64(DCM_WindowWidth, windowWidth).good())
+            {
+                std::cout << "Window Width: " << windowWidth << std::endl;
+            }
+            else
+            {
+                std::cerr << "Error: Window Width not found." << std::endl;
+            }
+
+            if (dataset->findAndGetUint16(DCM_Rows, rows).good() && dataset->findAndGetUint16(DCM_Columns, columns).good() && pixelData)
+            {
+                std::cout << "rows: " << rows << "\n";
+                std::cout << "columns: " << columns << "\n";
+                for (int i = 0; i < rows; ++i)
+                {
+                    for (int j = 0; j < columns; ++j)
+                    {
+                        if (pixelData[i * columns + j] < smallest)
+                        {
+                            smallest = pixelData[i * columns + j];
+                        }
+                        if (pixelData[i * columns + j] > highest)
+                        {
+                            highest = pixelData[i * columns + j];
+                        }
+                        //std::cout << pixelData[i * columns + j] << " ";
+                    }
+                    //std::cout << "\n";
+                }
+
+                std::cout << smallest << " " << highest << "\n";
+            }
+            else
+            {
+                std::cerr << "Error: Unable to get pixel data for the single frame" << std::endl;
+            }
+
+            // Clean up
+            delete dcmImage;
+        }
+        else
+        {
+            std::cerr << "Error: Unable to load DICOM image" << std::endl;
+        }
+    }
+    return 0;
 }
+
+#pragma warning(pop)

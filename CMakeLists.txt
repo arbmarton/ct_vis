@@ -12,10 +12,12 @@ set(THIRDPARTY_SOURCES
 )
 
 set(HEADER_FILES
+	include/BasicDraw.h
 	include/Test.h
 )
 
 set(SOURCE_FILES
+	src/BasicDraw.cpp
 	src/main.cpp
 	src/Test.cpp
 )
@@ -32,7 +34,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/ofstd/include/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/oflog/include/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/dcmimgle/include/
-						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/dcmdata/include/   
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/dcmdata/include/
+
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/cimg/
 )
 
 target_link_libraries(${PROJECT_NAME}
