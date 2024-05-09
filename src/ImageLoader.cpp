@@ -1,19 +1,14 @@
 #include "ImageLoader.h"
 
+#include "dcmtk/dcmimgle/dcmimage.h"
+
 #include <thread>
 #include <mutex>
 
 ImageLoader::ImageLoader(const std::filesystem::path& folderPath, const uint32_t maxThreads)
     : m_Folder(folderPath)
+    , m_MaxThreads(maxThreads == 0 ? std::thread::hardware_concurrency() : maxThreads)
 {
-    if (maxThreads == 0)
-    {
-        m_MaxThreads = std::thread::hardware_concurrency();
-    }
-    else
-    {
-        m_MaxThreads = maxThreads;
-    }
 }
 
 std::vector<std::unique_ptr<DicomImage>> ImageLoader::load() const

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "dcmtk/dcmimgle/dcmimage.h"
-
 #include <string>
 #include <filesystem>
 #include <vector>
 #include <memory>
+
+class DicomImage;
 
 class ImageLoader
 {
@@ -16,5 +16,5 @@ public:
 
 private:
     const std::filesystem::path m_Folder;
-    uint32_t m_MaxThreads;
+    const uint32_t m_MaxThreads;
 };
