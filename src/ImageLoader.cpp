@@ -29,7 +29,7 @@ std::vector<std::unique_ptr<DicomImage>> ImageLoader::load() const
     }
 
     const auto threadLambda = [&](const uint32_t threadID) {
-        for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += 12)
+        for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += m_MaxThreads)
         {
             const auto currentPath = dicomDirectoryEntries[iter];
             auto img = std::make_unique<DicomImage>(currentPath.string().c_str());
