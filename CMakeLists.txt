@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.9)
 project(ct_vis)
 
 set(CMAKE_CXX_STANDARD 20)
+set(GLM_TEST_ENABLE OFF)
+
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/)
 
 if (APPLE)
     find_package(X11)
@@ -17,22 +22,35 @@ set(THIRDPARTY_SOURCES
 )
 
 set(HEADER_FILES
+	include/Bank.h
 	include/BasicDraw.h
+	include/Enums.h
 	include/ImageLoader.h
 	include/ImageSet.h
-	include/Test.h
+	include/OpenGL.h
+	include/Renderer.h
+	include/Shader.h
+	include/Utilities.h
 )
 
 set(SOURCE_FILES
 	src/BasicDraw.cpp
 	src/ImageLoader.cpp
 	src/main.cpp
-	src/Test.cpp
+	src/Renderer.cpp
+	src/Shader.cpp
+	src/Utilities.cpp
+)
+
+set(SHADER_FILES
+	shaders/quad.vs
+	shaders/quad.fs
 )
 
 add_executable(${PROJECT_NAME}
 	           ${HEADER_FILES}
 			   ${SOURCE_FILES}
+			   ${SHADER_FILES}
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -45,6 +63,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/dcmdata/include/
 
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/cimg/
+
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/glm/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/include/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/include/
 )
 
 if (APPLE)
@@ -69,9 +91,15 @@ else()
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/dcmdata.lib
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/ofstd.lib
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/oflog.lib
+
+						  ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glm/glm/$<CONFIG>/glm_static.lib
+						  ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glfw-3.3/src/$<CONFIG>/glfw3.lib
+					      ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glad/$<CONFIG>/glad.lib
+						  opengl32.dll
     )
 endif()
 
+source_group("shaders" FILES ${SHADER_FILES})
 
 # Parallel compilation and C++17
 if(MSVC)
