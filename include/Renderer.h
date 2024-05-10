@@ -15,7 +15,7 @@ public:
 
     //GLuint testTexture;
     GLuint testTexture2;
-    float zLevel = 0.0f;
+    float zLevel = 1.0f;
 
     void draw() const;
 

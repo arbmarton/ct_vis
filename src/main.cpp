@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 
     glfwSetFramebufferSizeCallback(context, [](GLFWwindow* /*window*/, const int width, const int height) { glViewport(0, 0, width, height); });
     glfwSetCursorPosCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double /*y*/) {});
-    glfwSetScrollCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double y) { Renderer::instance().zLevel += float(y * 0.01); });
+    glfwSetScrollCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double y) { Renderer::instance().zLevel -= float(y * 0.01); });
     glfwSetMouseButtonCallback(context, [](GLFWwindow* /*window*/, int /*button*/, int /*action*/, int /*mods*/) {});
 
     const auto loader = ImageLoader("g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/");
