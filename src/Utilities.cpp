@@ -55,6 +55,33 @@ GLuint textureFromDicomImage(DicomImage* img)
     return textureID;
 }
 
+GLuint texture3DFromData(const std::vector<uint8_t>& vec)
+{
+    const uint8_t* data = vec.data();
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    if (data)
+    {
+        glBindTexture(GL_TEXTURE_3D, textureID);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, 512, 512, GLsizei(vec.size() / (512 * 512)), 0, GL_RED, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_3D);
+
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: "
+            << "\n";
+    }
+    return textureID;
+}
+
 std::filesystem::path getTempFolderPath()
 {
     std::string root = std::filesystem::current_path().parent_path().string();

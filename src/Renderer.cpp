@@ -2,6 +2,18 @@
 
 #include "Bank.h"
 
+Renderer& Renderer::instance()
+{
+    static Renderer* inst = nullptr;
+
+    if (!inst)
+    {
+        inst = new Renderer();
+    }
+
+    return *inst;
+}
+
 Renderer::Renderer()
 {
     glEnable(GL_DEPTH_TEST);
@@ -26,13 +38,14 @@ void Renderer::draw() const
 
     const auto& quadShader = ShaderBank::instance().getValue(ShaderType::Quad);
     quadShader->use();
+    quadShader->setFloat("zLevel", zLevel);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, testTexture);
+    glBindTexture(GL_TEXTURE_3D, testTexture2);
 
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);

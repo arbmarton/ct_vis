@@ -10,12 +10,15 @@
 #include <filesystem>
 #include <string>
 #include <map>
+#include <vector>
+#include <cinttypes>
 
 class DicomImage;
 
 namespace utils {
 
 GLuint textureFromDicomImage(DicomImage* img);
+GLuint texture3DFromData(const std::vector<uint8_t>& vec);
 
 std::filesystem::path getTempFolderPath();
 std::filesystem::path getShaderFolderPath();
