@@ -1,6 +1,6 @@
-[submodule "thirdparty/dcmtk"]
-	path = thirdparty/dcmtk
-	url = https://github.com/DCMTK/dcmtk
 [submodule "thirdparty/cimg"]
 	path = thirdparty/cimg
 	url = https://github.com/GreycLab/CImg.git
+[submodule "thirdparty/dcmtk"]
+	path = thirdparty/dcmtk
+	url = https://github.com/DCMTK/dcmtk.git
