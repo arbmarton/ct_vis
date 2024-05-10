@@ -29,6 +29,7 @@ ImageSet ImageLoader::load() const
         dicomDirectoryEntries.push_back(currentPath);
     }
     ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
+    ret.m_DicomImages.resize(dicomDirectoryEntries.size());
 
     const auto threadLambda = [&](const uint32_t threadID) {
         for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += m_MaxThreads)
@@ -49,7 +50,7 @@ ImageSet ImageLoader::load() const
 
             {
                 std::lock_guard<std::mutex> guard(dicomImageMutex);
-                ret.m_DicomImages.push_back(std::move(img));
+                ret.m_DicomImages[iter] = std::move(img);
             }
         }
     };
