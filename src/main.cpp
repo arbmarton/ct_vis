@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    if constexpr (vsync)
+    if constexpr (!vsync)
     {
         glfwWindowHint(GLFW_DOUBLEBUFFER, GL_FALSE);
     }
