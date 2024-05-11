@@ -17,6 +17,8 @@
 
 constexpr bool vsync = false;
 
+const std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/";
+
 int main(int argc, char** argv)
 {
     (void)argc;
@@ -55,14 +57,13 @@ int main(int argc, char** argv)
 
     glfwSetFramebufferSizeCallback(context, [](GLFWwindow* /*window*/, const int width, const int height) { glViewport(0, 0, width, height); });
     glfwSetCursorPosCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double /*y*/) {});
-    glfwSetScrollCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double y) { Renderer::instance().zLevel -= float(y * 0.01); });
+    glfwSetScrollCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double y) { Renderer::instance().onScroll(float(y)); });
     glfwSetMouseButtonCallback(context, [](GLFWwindow* /*window*/, int /*button*/, int /*action*/, int /*mods*/) {});
 
-    const auto loader = ImageLoader("g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/");
+    const auto loader = ImageLoader(folder);
     const auto imageSet = loader.load();
 
-    //renderer.testTexture = utils::textureFromDicomImage(imageSet.m_DicomImages[0].get());
-    Renderer::instance().testTexture2 = utils::texture3DFromData(imageSet.m_PixelData);
+    Renderer::instance().setTexture(utils::texture3DFromData(imageSet.m_PixelData));
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     while (!glfwWindowShouldClose(context))

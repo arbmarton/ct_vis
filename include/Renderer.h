@@ -9,15 +9,16 @@ class Renderer
 public:
     static Renderer& instance();
 
-
     constexpr static uint32_t RENDER_WIDTH = 512 * 2;
     constexpr static uint32_t RENDER_HEIGHT = 512 * 2;
 
-    //GLuint testTexture;
-    GLuint testTexture2;
-    float zLevel = 1.0f;
-
     void draw() const;
+    void onScroll(const float yOffset);
+
+    void setTexture(const GLuint texture)
+    {
+        m_Texture = texture;
+    }
 
 private:
     Renderer();
@@ -27,4 +28,8 @@ private:
     };
     GLuint m_QuadVAO;
     GLuint m_QuadVBO;
+
+    GLuint m_Texture = 0;
+
+    float m_zLevel = 1.0f;
 };

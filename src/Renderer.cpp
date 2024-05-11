@@ -38,15 +38,21 @@ void Renderer::draw() const
 
     const auto& quadShader = ShaderBank::instance().getValue(ShaderType::Quad);
     quadShader->use();
-    quadShader->setFloat("zLevel", zLevel);
+    quadShader->setFloat("zLevel", m_zLevel);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, testTexture2);
+    glBindTexture(GL_TEXTURE_3D, m_Texture);
 
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void Renderer::onScroll(const float yOffset)
+{
+    m_zLevel -= float(yOffset * 0.01);
+    m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
 }
