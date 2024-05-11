@@ -39,7 +39,7 @@ void Renderer::draw() const
     const auto& quadShader = ShaderBank::instance().getValue(ShaderType::Quad);
     quadShader->use();
     quadShader->setFloat("zLevel", m_zLevel);
-    quadShader->setVec3("forward", glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)));
+    quadShader->setVec3("forward", glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -54,6 +54,6 @@ void Renderer::draw() const
 
 void Renderer::onScroll(const float yOffset)
 {
-    m_zLevel -= float(yOffset * 0.01);
+    m_zLevel += float(yOffset * 0.01);
     m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
 }

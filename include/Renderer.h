@@ -31,5 +31,5 @@ private:
 
     GLuint m_Texture = 0;
 
-    float m_zLevel = 1.0f;
+    float m_zLevel = 0.0f;
 };
