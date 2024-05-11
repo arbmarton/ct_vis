@@ -1,3 +1,6 @@
+brew install cmake
+brew install xquartz
+
 git submodule update --init
 
 cd thirdparty/dcmtk
