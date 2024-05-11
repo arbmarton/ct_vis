@@ -39,6 +39,7 @@ void Renderer::draw() const
     const auto& quadShader = ShaderBank::instance().getValue(ShaderType::Quad);
     quadShader->use();
     quadShader->setFloat("zLevel", m_zLevel);
+    quadShader->setVec3("forward", glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)));
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
