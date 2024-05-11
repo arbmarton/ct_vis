@@ -4,7 +4,7 @@ out vec4 FragColor;
   
 in vec2 TexCoords;
 
-uniform sampler3D screenTexture;
+uniform sampler3D texture3D;
 uniform float zLevel;
 uniform vec3 forward;
 
@@ -19,6 +19,6 @@ void main()
 		up * ((1.0 - TexCoords.y) * 2.0 - 1.0) * 0.5 +
 		forward * (zLevel * 2.0 - 1.0) * 0.5;
 
-	const vec4 sampled = texture(screenTexture, samplingPosition);
+	const vec4 sampled = texture(texture3D, samplingPosition);
 	FragColor = vec4(sampled.r, sampled.r, sampled.r, 1.0);
 }

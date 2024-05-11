@@ -34,19 +34,37 @@ Renderer::Renderer()
 
 void Renderer::draw() const
 {
+    glViewport(0, 0, m_BufferViewport1.m_Width, m_BufferViewport1.m_Height);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_BufferViewport1.m_FrameBuffer);
+    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    const auto& ctViewportShader = ShaderBank::instance().getValue(ShaderType::CtViewport);
+    ctViewportShader->use();
+    ctViewportShader->setFloat("zLevel", m_zLevel);
+    ctViewportShader->setVec3("forward", glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_3D, m_3DTexture);
+
+    glBindVertexArray(m_QuadVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+
+
+
+
     glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
-
-    const auto& quadShader = ShaderBank::instance().getValue(ShaderType::Quad);
-    quadShader->use();
-    quadShader->setFloat("zLevel", m_zLevel);
-    quadShader->setVec3("forward", glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
-
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    const auto& mainViewportShader = ShaderBank::instance().getValue(ShaderType::MainViewport);
+    mainViewportShader->use();
+
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, m_Texture);
+    glBindTexture(GL_TEXTURE_2D, m_BufferViewport1.m_TexColorBuffer);
 
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);

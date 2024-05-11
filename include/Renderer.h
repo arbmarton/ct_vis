@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Framebuffer.h"
+
 #include "glad/glad.h"
 
 #include <cinttypes>
+#include <limits>
 
 class Renderer
 {
@@ -15,9 +18,9 @@ public:
     void draw() const;
     void onScroll(const float yOffset);
 
-    void setTexture(const GLuint texture)
+    void set3DTexture(const GLuint texture)
     {
-        m_Texture = texture;
+        m_3DTexture = texture;
     }
 
 private:
@@ -29,7 +32,12 @@ private:
     GLuint m_QuadVAO;
     GLuint m_QuadVBO;
 
-    GLuint m_Texture = 0;
+    Framebuffer m_BufferViewport1 = Framebuffer(512, 512);
+    Framebuffer m_BufferViewport2 = Framebuffer(512, 512);
+    Framebuffer m_BufferViewport3 = Framebuffer(512, 512);
+
+#undef max // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
+    GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
 
     float m_zLevel = 0.0f;
 };

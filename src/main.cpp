@@ -61,10 +61,8 @@ int main(int argc, char** argv)
     glfwSetScrollCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double y) { Renderer::instance().onScroll(float(y)); });
     glfwSetMouseButtonCallback(context, [](GLFWwindow* /*window*/, int /*button*/, int /*action*/, int /*mods*/) {});
 
-    const auto loader = ImageLoader(folder);
-    const auto imageSet = loader.load();
-
-    Renderer::instance().setTexture(utils::texture3DFromData(imageSet.m_PixelData));
+    const auto imageSet = ImageLoader(folder).load();
+    Renderer::instance().set3DTexture(utils::texture3DFromData(imageSet.m_PixelData));
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     while (!glfwWindowShouldClose(context))

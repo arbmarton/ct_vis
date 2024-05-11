@@ -5,7 +5,6 @@
 
 #include "glad/glad.h"
 
-#include <map>
 #include <unordered_map>
 #include <memory>
 #include <mutex>
@@ -83,8 +82,11 @@ inline std::unique_ptr<Shader>& Bank<ShaderType, std::unique_ptr<Shader>>::getVa
             case ShaderType::Basic:
                 addValue(key, std::make_unique<BasicShader>());
                 break;
-            case ShaderType::Quad:
-                addValue(key, std::make_unique<QuadShader>());
+            case ShaderType::CtViewport:
+                addValue(key, std::make_unique<CtViewportShader>());
+                break;
+            case ShaderType::MainViewport:
+                addValue(key, std::make_unique<MainViewportShader>());
                 break;
             default:
                 throw std::exception();

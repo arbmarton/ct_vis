@@ -77,7 +77,7 @@ GLuint texture3DFromData(const std::vector<uint8_t>& vec)
     else
     {
         std::cout << "Texture failed to load at path: "
-            << "\n";
+                  << "\n";
     }
     return textureID;
 }

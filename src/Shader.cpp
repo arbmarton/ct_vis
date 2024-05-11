@@ -252,7 +252,12 @@ void Shader::setVec2(const std::string& name, const glm::vec2& vec) const
     glUniform2fv(glGetUniformLocation(m_ID, name.c_str()), 1, &vec[0]);
 }
 
-void QuadShader::setValues() const
+void CtViewportShader::setValues() const
+{
+    setInt("texture3D", 0);
+}
+
+void MainViewportShader::setValues() const
 {
     setInt("screenTexture", 0);
 }

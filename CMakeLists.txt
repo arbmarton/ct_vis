@@ -25,6 +25,7 @@ set(HEADER_FILES
 	include/Bank.h
 	include/BasicDraw.h
 	include/Enums.h
+	include/Framebuffer.h
 	include/ImageLoader.h
 	include/ImageSet.h
 	include/OpenGL.h
@@ -36,6 +37,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	src/BasicDraw.cpp
 	src/ImageLoader.cpp
+	src/Framebuffer.cpp
 	src/main.cpp
 	src/Renderer.cpp
 	src/Shader.cpp
@@ -43,8 +45,10 @@ set(SOURCE_FILES
 )
 
 set(SHADER_FILES
-	shaders/quad.vs
-	shaders/quad.fs
+	shaders/ct_viewport.vs
+	shaders/ct_viewport.fs
+	shaders/main_viewport.vs
+	shaders/main_viewport.fs
 )
 
 add_executable(${PROJECT_NAME}

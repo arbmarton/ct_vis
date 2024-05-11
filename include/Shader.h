@@ -95,11 +95,22 @@ public:
     }
 };
 
-class QuadShader : public Shader
+class CtViewportShader : public Shader
 {
 public:
-    QuadShader()
-        : Shader(ShaderType::Quad)
+    CtViewportShader()
+        : Shader(ShaderType::CtViewport)
+    {
+    }
+
+    void setValues() const override;
+};
+
+class MainViewportShader : public Shader
+{
+public:
+    MainViewportShader()
+        : Shader(ShaderType::MainViewport)
     {
     }
 

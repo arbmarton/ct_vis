@@ -40,7 +40,8 @@ inline std::string textureTypeToString(const TextureType type)
 enum class ShaderType
 {
     Basic,
-    Quad,
+    CtViewport,
+    MainViewport,
     None
 };
 
@@ -50,8 +51,10 @@ inline std::string shaderTypeToString(const ShaderType type)
     {
         case ShaderType::Basic:
             return "basic";
-        case ShaderType::Quad:
-            return "quad";
+        case ShaderType::CtViewport:
+            return "ct_viewport";
+        case ShaderType::MainViewport:
+            return "main_viewport";
     }
 
     throw std::exception();
