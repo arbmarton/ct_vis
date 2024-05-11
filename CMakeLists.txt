@@ -4,13 +4,18 @@ project(ct_vis)
 set(CMAKE_CXX_STANDARD 20)
 set(GLM_TEST_ENABLE OFF)
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/)
+if (APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-volatile")
+endif(APPLE)
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/)
 
 if (APPLE)
     find_package(X11)
     find_package(ZLIB)
+    find_package(OpenGL REQUIRED)
 endif(APPLE)
 
 set(THIRDPARTY_HEADERS
@@ -88,9 +93,17 @@ if (APPLE)
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/libofstd.a
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/liboficonv.a
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/liboflog.a
+                          
+                          ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glm/glm/$<CONFIG>/libglm_static.a
+                          ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glfw-3.3/src/$<CONFIG>/libglfw3.a
+                          ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glad/$<CONFIG>/libglad.a
     )
     target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
-    target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB)
+    target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} OpenGL::GL)
+    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
+    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
+    target_link_libraries(${PROJECT_NAME} "-framework CoreVideo")
 else()
     target_link_libraries(${PROJECT_NAME}
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/dcmimgle.lib
