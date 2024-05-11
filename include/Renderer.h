@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Framebuffer.h"
+#include "Viewport.h"
 
 #include "glad/glad.h"
 
@@ -17,6 +17,7 @@ public:
 
     void draw() const;
     void onScroll(const float yOffset);
+    void onMouseMove(const float xPos, const float yPos);
 
     void set3DTexture(const GLuint texture)
     {
@@ -32,12 +33,13 @@ private:
     GLuint m_QuadVAO;
     GLuint m_QuadVBO;
 
-    Framebuffer m_BufferViewport1 = Framebuffer(512, 512);
-    Framebuffer m_BufferViewport2 = Framebuffer(512, 512);
-    Framebuffer m_BufferViewport3 = Framebuffer(512, 512);
+    Viewport m_Viewport1 = Viewport(512, 512, glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)), 0.0f);
+    Viewport m_Viewport2 = Viewport(512, 512, glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)), 0.5f);
+    Viewport m_Viewport3 = Viewport(512, 512, glm::normalize(glm::vec3(0.01f, 0.99f, 0.0f)), 0.5f);
 
 #undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
     GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
 
-    float m_zLevel = 0.0f;
+    float m_LastMouseX = RENDER_WIDTH / 2;
+    float m_LastMouseY = RENDER_HEIGHT / 2;
 };

@@ -32,6 +32,7 @@ set(HEADER_FILES
 	include/Renderer.h
 	include/Shader.h
 	include/Utilities.h
+	include/Viewport.h
 )
 
 set(SOURCE_FILES
@@ -42,6 +43,7 @@ set(SOURCE_FILES
 	src/Renderer.cpp
 	src/Shader.cpp
 	src/Utilities.cpp
+	src/Viewport.cpp
 )
 
 set(SHADER_FILES
