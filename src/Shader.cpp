@@ -259,5 +259,7 @@ void CtViewportShader::setValues() const
 
 void MainViewportShader::setValues() const
 {
-    setInt("screenTexture", 0);
+    setInt("viewport1", 0);
+    setInt("viewport2", 1);
+    setInt("viewport3", 2);
 }

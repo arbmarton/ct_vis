@@ -34,26 +34,27 @@ Renderer::Renderer()
 
 void Renderer::draw() const
 {
-    glViewport(0, 0, m_BufferViewport1.m_Width, m_BufferViewport1.m_Height);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_BufferViewport1.m_FrameBuffer);
-    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    const auto& renderViewport = [this](const Framebuffer& framebuffer, const glm::vec3& forward) {
+        glViewport(0, 0, framebuffer.m_Width, framebuffer.m_Height);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
+        glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const auto& ctViewportShader = ShaderBank::instance().getValue(ShaderType::CtViewport);
-    ctViewportShader->use();
-    ctViewportShader->setFloat("zLevel", m_zLevel);
-    ctViewportShader->setVec3("forward", glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
+        const auto& ctViewportShader = ShaderBank::instance().getValue(ShaderType::CtViewport);
+        ctViewportShader->use();
+        ctViewportShader->setFloat("zLevel", m_zLevel);
+        ctViewportShader->setVec3("forward", forward);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, m_3DTexture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_3D, m_3DTexture);
 
-    glBindVertexArray(m_QuadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(m_QuadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    };
 
-
-
-
-
+    renderViewport(m_BufferViewport1, glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
+    renderViewport(m_BufferViewport2, glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)));
+    renderViewport(m_BufferViewport3, glm::normalize(glm::vec3(0.01f, 0.99f, 0.0f)));
 
     glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -65,6 +66,10 @@ void Renderer::draw() const
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_BufferViewport1.m_TexColorBuffer);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_BufferViewport2.m_TexColorBuffer);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, m_BufferViewport3.m_TexColorBuffer);
 
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);

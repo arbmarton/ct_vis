@@ -12,8 +12,8 @@ class Renderer
 public:
     static Renderer& instance();
 
-    constexpr static uint32_t RENDER_WIDTH = 512 * 2;
-    constexpr static uint32_t RENDER_HEIGHT = 512 * 2;
+    constexpr static uint32_t RENDER_WIDTH = 512 * 3;
+    constexpr static uint32_t RENDER_HEIGHT = 512 * 3;
 
     void draw() const;
     void onScroll(const float yOffset);
@@ -36,7 +36,7 @@ private:
     Framebuffer m_BufferViewport2 = Framebuffer(512, 512);
     Framebuffer m_BufferViewport3 = Framebuffer(512, 512);
 
-#undef max // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
+#undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
     GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
 
     float m_zLevel = 0.0f;
