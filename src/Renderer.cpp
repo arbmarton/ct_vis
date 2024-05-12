@@ -38,7 +38,7 @@ void Renderer::draw() const
         throw 0;
     }
 
-    const auto& renderViewport = [this](const Viewport& viewport) {
+    const auto renderViewport = [this](const Viewport& viewport) {
         const auto& framebuffer = viewport.getFrameBuffer();
         glViewport(0, 0, framebuffer.m_Width, framebuffer.m_Height);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
@@ -61,8 +61,13 @@ void Renderer::draw() const
     renderViewport(m_Viewport2);
     renderViewport(m_Viewport3);
 
-    glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#ifdef __APPLE__ // TODO: check properly for a retina display somehow
+    // Retina bullshit need to be taken into account when rendering into the backbuffer...
+    glViewport(0, 0, RENDER_WIDTH * 2, RENDER_HEIGHT * 2);
+#else
+    glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+#endif
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

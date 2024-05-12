@@ -91,7 +91,11 @@ std::filesystem::path getTempFolderPath()
 
 std::filesystem::path getShaderFolderPath()
 {
+#ifdef __APPLE__
+    std::string root = std::filesystem::current_path().parent_path().parent_path().string();
+#else
     std::string root = std::filesystem::current_path().parent_path().string();
+#endif
     root.append("/shaders/");
     return std::filesystem::path(root);
 }

@@ -28,6 +28,9 @@ ImageSet ImageLoader::load() const
 
         dicomDirectoryEntries.push_back(currentPath);
     }
+    // Force alphebetical order
+    std::sort(dicomDirectoryEntries.begin(), dicomDirectoryEntries.end());
+    
     ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret.m_DicomImages.resize(dicomDirectoryEntries.size());
 

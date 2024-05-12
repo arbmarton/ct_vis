@@ -6,9 +6,14 @@ set(GLM_TEST_ENABLE OFF)
 
 if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-volatile")
+    set(DCMTK_ENABLE_BUILTIN_DICTIONARY ON)
 endif(APPLE)
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/)
+if (APPLE)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad_macos/)
+else()
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/)
+endif(APPLE)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/)
 
@@ -77,12 +82,17 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/glm/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/include/
-						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/include/
+						   
 )
 
 if (APPLE)
     target_include_directories(${PROJECT_NAME} PUBLIC
                                "/opt/X11/include"
+                                ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad_macos/include/
+    )
+else()
+    target_include_directories(${PROJECT_NAME} PUBLIC
+                               ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/include/
     )
 endif(APPLE)
 
@@ -96,7 +106,7 @@ if (APPLE)
                           
                           ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glm/glm/$<CONFIG>/libglm_static.a
                           ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glfw-3.3/src/$<CONFIG>/libglfw3.a
-                          ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glad/$<CONFIG>/libglad.a
+                          ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glad_macos/$<CONFIG>/libglad.a
     )
     target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
     target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})

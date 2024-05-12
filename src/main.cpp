@@ -2,14 +2,16 @@
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmimgle/dcmimage.h"
 
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include "BasicDraw.h"
 #include "ImageLoader.h"
 #include "OpenGL.h"
 #include "Renderer.h"
 #include "Utilities.h"
+
+#include <OpenGL/gl.h>
 
 #include <iostream>
 #include <string>
