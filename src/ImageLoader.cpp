@@ -30,7 +30,7 @@ ImageSet ImageLoader::load() const
     }
     // Force alphebetical order
     std::sort(dicomDirectoryEntries.begin(), dicomDirectoryEntries.end());
-    
+
     ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret.m_DicomImages.resize(dicomDirectoryEntries.size());
 

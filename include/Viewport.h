@@ -12,27 +12,27 @@
 class Viewport
 {
 public:
-	Viewport(const uint32_t width, const uint32_t height, const glm::vec3& forward, const float zLevel);
+    Viewport(const uint32_t width, const uint32_t height, const glm::vec3& forward, const float zLevel);
 
-	void onScroll(const float yOffset);
-	const Framebuffer& getFrameBuffer() const
-	{
-		return m_BufferViewport;
-	}
-	glm::vec3 getForward() const
-	{
-		return m_Forward;
-	}
-	float getZLevel() const
-	{
-		return m_zLevel;
-	}
+    void onScroll(const float yOffset);
+    const Framebuffer& getFrameBuffer() const
+    {
+        return m_BufferViewport;
+    }
+    glm::vec3 getForward() const
+    {
+        return m_Forward;
+    }
+    float getZLevel() const
+    {
+        return m_zLevel;
+    }
 
 private:
-	const uint32_t m_Width;
-	const uint32_t m_Height;
-	const Framebuffer m_BufferViewport;
+    const uint32_t m_Width;
+    const uint32_t m_Height;
+    const Framebuffer m_BufferViewport;
 
-	glm::vec3 m_Forward;
-	float m_zLevel;
+    glm::vec3 m_Forward;
+    float m_zLevel;
 };

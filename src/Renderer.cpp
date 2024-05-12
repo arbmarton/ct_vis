@@ -34,7 +34,8 @@ Renderer::Renderer()
 
 void Renderer::draw() const
 {
-    if (m_3DTexture == std::numeric_limits<GLuint>::max()) {
+    if (m_3DTexture == std::numeric_limits<GLuint>::max())
+    {
         throw 0;
     }
 
@@ -62,7 +63,7 @@ void Renderer::draw() const
     renderViewport(m_Viewport3);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#ifdef __APPLE__ // TODO: check properly for a retina display somehow
+#ifdef __APPLE__  // TODO: check properly for a retina display somehow
     // Retina bullshit need to be taken into account when rendering into the backbuffer...
     glViewport(0, 0, RENDER_WIDTH * 2, RENDER_HEIGHT * 2);
 #else
@@ -87,13 +88,16 @@ void Renderer::draw() const
 
 void Renderer::onScroll(const float yOffset)
 {
-    if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2) {
+    if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
+    {
         m_Viewport1.onScroll(yOffset);
     }
-    else if (m_LastMouseX >= RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2) {
+    else if (m_LastMouseX >= RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
+    {
         m_Viewport2.onScroll(yOffset);
     }
-    else if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY >= RENDER_HEIGHT / 2) {
+    else if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY >= RENDER_HEIGHT / 2)
+    {
         m_Viewport3.onScroll(yOffset);
     }
 }
