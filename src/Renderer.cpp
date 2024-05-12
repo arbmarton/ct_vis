@@ -87,8 +87,6 @@ void Renderer::draw() const
 
 void Renderer::onScroll(const float yOffset)
 {
-    //m_zLevel += float(yOffset * 0.01);
-    //m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
     if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2) {
         m_Viewport1.onScroll(yOffset);
     }
