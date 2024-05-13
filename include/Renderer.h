@@ -12,8 +12,8 @@ class Renderer
 public:
     static Renderer& instance();
 
-    constexpr static uint32_t RENDER_WIDTH = 512 * 2;
-    constexpr static uint32_t RENDER_HEIGHT = 512 * 2;
+    constexpr static uint32_t RENDER_WIDTH = 512 * 3;
+    constexpr static uint32_t RENDER_HEIGHT = 512 * 3;
 
     void draw() const;
     void onScroll(const float yOffset);

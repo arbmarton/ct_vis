@@ -1,6 +1,7 @@
 #include "ImageLoader.h"
 
 #include "dcmtk/dcmimgle/dcmimage.h"
+#include <dcmtk/dcmdata/dctk.h>
 
 #include <thread>
 #include <mutex>
@@ -16,6 +17,7 @@ ImageSet ImageLoader::load() const
     ImageSet ret;
     std::mutex dicomImageMutex;
     std::mutex pixelDataMutex;
+    std::mutex hounsfieldMutex;
 
     std::vector<std::filesystem::path> dicomDirectoryEntries;
     for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(m_Folder))
@@ -32,6 +34,7 @@ ImageSet ImageLoader::load() const
     std::sort(dicomDirectoryEntries.begin(), dicomDirectoryEntries.end());
 
     ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
+    ret.m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret.m_DicomImages.resize(dicomDirectoryEntries.size());
 
     const auto threadLambda = [&](const uint32_t threadID) {
@@ -43,12 +46,57 @@ ImageSet ImageLoader::load() const
             {
                 throw 0;
             }
-            img->setMinMaxWindow();
-            const uint8_t* pixelData = static_cast<const uint8_t*>(img->getOutputData(8));
+            if (img->getPhotometricInterpretation() != EPI_Monochrome2) 
+            {
+                throw 0;
+            }
+            DcmFileFormat fileformat;
+            fileformat.loadFile(currentPath.string().c_str());
+            auto dataset = fileformat.getDataset();
+            Float64 rescaleIntercept;
+            Float64 rescaleSlope;
+            dataset->findAndGetFloat64(DCM_RescaleSlope, rescaleSlope);
+            dataset->findAndGetFloat64(DCM_RescaleIntercept, rescaleIntercept);
+            const auto width = img->getWidth();
+            const auto height = img->getHeight();
+
+            const auto internalPixelDataPtr = img->getInterData()->getData();
+            const auto internalRepresentation = img->getInterData()->getRepresentation();
+
+            if (internalRepresentation != EPR_Sint16) {
+                throw 0;
+            }
+
+            const auto castedData = static_cast<const Sint16*>(internalPixelDataPtr);
+            std::vector<float> floatData;
+            floatData.resize(width * height);
+
+            double min;
+            double max;
+            img->getMinMaxValues(min, max);
+            std::cout << "min HU value in image: " << min << "\n";
+            std::cout << "max HU value in image: " << max << "\n";
+
+            for (size_t i = 0; i < width * height; ++i) {
+                if (castedData[i] < min || castedData[i] > max) {
+                    throw 0;
+                }
+                //std::cout << castedData[i] << " ";
+                floatData[i] = (castedData[i] * float(rescaleSlope)) + float(rescaleIntercept);
+            }
 
             {
+                // TODO: it should be possible to eliminate floatData
+                std::lock_guard<std::mutex> guard(hounsfieldMutex);
+                memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height);
+            }
+
+            img->setMinMaxWindow();
+            const uint8_t* pixelData = static_cast<const uint8_t*>(img->getOutputData(8));
+            
+            {
                 std::lock_guard<std::mutex> guard(pixelDataMutex);
-                memcpy(&ret.m_PixelData[512 * 512 * iter], pixelData, 512 * 512);
+                memcpy(&ret.m_PixelData[width * height * iter], pixelData, width * height);
             }
 
             {
