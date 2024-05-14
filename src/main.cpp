@@ -11,6 +11,7 @@
 #include "Renderer.h"
 #include "Utilities.h"
 #include "Bank.h"
+#include "DataTransform.h"
 
 #include <iostream>
 #include <string>
@@ -18,9 +19,9 @@
 
 constexpr bool vsync = false;
 
-//const std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/";
-const std::string folder =
-    "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-00799/10-06-2008-NA-CT V ABDPEL-75914/3.000000-Recon 2 VENOGRAM AP-05356/";
+const std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/";
+//const std::string folder =
+    //"g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-00799/10-06-2008-NA-CT V ABDPEL-75914/3.000000-Recon 2 VENOGRAM AP-05356/";
 //const std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/test/";
 
 int main(int argc, char** argv)
@@ -69,9 +70,11 @@ int main(int argc, char** argv)
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     const auto imageSet = ImageLoader(folder).load();
+    //const auto test = data::transformHUtoPixels(imageSet.m_HounsfieldData, -2000, 500);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
-    Renderer::instance().set3DTexture(utils::texture3DFromData(imageSet.m_PixelData));
+    //Renderer::instance().set3DTexture(utils::texture3DFromData(test));
+    Renderer::instance().set3DTexture(utils::texture3DFromData(imageSet.m_HounsfieldData));
     std::chrono::steady_clock::time_point asd = std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(asd - end).count() << "[ms]" << std::endl;
 

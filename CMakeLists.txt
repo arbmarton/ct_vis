@@ -34,6 +34,7 @@ set(THIRDPARTY_SOURCES
 set(HEADER_FILES
 	include/Bank.h
 	include/BasicDraw.h
+	include/DataTransform.h
 	include/Enums.h
 	include/Framebuffer.h
 	include/ImageLoader.h
@@ -47,6 +48,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
 	src/BasicDraw.cpp
+	src/DataTransform.cpp
 	src/ImageLoader.cpp
 	src/Framebuffer.cpp
 	src/main.cpp

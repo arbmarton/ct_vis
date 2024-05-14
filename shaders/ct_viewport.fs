@@ -7,6 +7,8 @@ in vec2 TexCoords;
 uniform sampler3D texture3D;
 uniform float zLevel;
 uniform vec3 forward;
+uniform float minWindow;
+uniform float maxWindow;
 
 void main()
 { 
@@ -20,5 +22,10 @@ void main()
 		forward * (zLevel * 2.0 - 1.0) * 0.5;
 
 	vec4 sampled = texture(texture3D, samplingPosition);
-	FragColor = vec4(sampled.r, sampled.r, sampled.r, 1.0);
+
+	float temp = max(sampled.r, minWindow);
+	float modifiedValue = min(temp, maxWindow);
+	float interpolation = (modifiedValue - minWindow) / (maxWindow - minWindow);
+
+	FragColor = vec4(interpolation, interpolation, interpolation, 1.0);
 }

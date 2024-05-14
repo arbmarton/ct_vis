@@ -76,6 +76,8 @@ ImageSet ImageLoader::load() const
             img->getMinMaxValues(min, max);
             std::cout << "min HU value in image: " << min << "\n";
             std::cout << "max HU value in image: " << max << "\n";
+            std::cout << "rescale slope: " << rescaleSlope << "\n";
+            std::cout << "rescale intercept: " << rescaleIntercept << "\n";
 
             for (size_t i = 0; i < width * height; ++i) {
                 if (castedData[i] < min || castedData[i] > max) {
@@ -88,7 +90,7 @@ ImageSet ImageLoader::load() const
             {
                 // TODO: it should be possible to eliminate floatData
                 std::lock_guard<std::mutex> guard(hounsfieldMutex);
-                memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height);
+                memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height * sizeof(float));
             }
 
             img->setMinMaxWindow();
@@ -96,7 +98,7 @@ ImageSet ImageLoader::load() const
             
             {
                 std::lock_guard<std::mutex> guard(pixelDataMutex);
-                memcpy(&ret.m_PixelData[width * height * iter], pixelData, width * height);
+                memcpy(&ret.m_PixelData[width * height * iter], pixelData, width * height * sizeof(uint8_t));
             }
 
             {

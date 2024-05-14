@@ -17,8 +17,10 @@ class DicomImage;
 
 namespace utils {
 
+std::vector<float> normalizeVector(const std::vector<float>& vec);
 GLuint textureFromDicomImage(DicomImage* img);
 GLuint texture3DFromData(const std::vector<uint8_t>& vec);
+GLuint texture3DFromData(const std::vector<float>& vec);
 
 std::filesystem::path getTempFolderPath();
 std::filesystem::path getShaderFolderPath();

@@ -29,6 +29,27 @@ constexpr int stoi_impl(const char* str, int value = 0)
 
 namespace utils {
 
+std::vector<float> normalizeVector(const std::vector<float>& vec)
+{
+    if (vec.empty()) {
+        return vec;
+    }
+
+    // Find the minimum and maximum values in the vector
+    float minVal = *std::min_element(vec.begin(), vec.end());
+    float maxVal = *std::max_element(vec.begin(), vec.end());
+
+    // Normalize each element in the vector
+    std::vector<float> normalizedVec;
+    normalizedVec.reserve(vec.size());
+    for (float value : vec) {
+        float normalizedValue = (value - minVal) / (maxVal - minVal);
+        normalizedVec.push_back(normalizedValue);
+    }
+
+    return normalizedVec;
+}
+
 GLuint textureFromDicomImage(DicomImage* img)
 {
     const uint8_t* data = static_cast<const uint8_t*>(img->getOutputData(8));
@@ -78,6 +99,33 @@ GLuint texture3DFromData(const std::vector<uint8_t>& vec)
     {
         std::cout << "Texture failed to load at path: "
                   << "\n";
+    }
+    return textureID;
+}
+
+GLuint texture3DFromData(const std::vector<float>& vec)
+{
+    const float* data = vec.data();
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    if (data)
+    {
+        glBindTexture(GL_TEXTURE_3D, textureID);
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 512, 512, GLsizei(vec.size() / (512 * 512)), 0, GL_RED, GL_FLOAT, data);
+        glGenerateMipmap(GL_TEXTURE_3D);
+
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: "
+            << "\n";
     }
     return textureID;
 }

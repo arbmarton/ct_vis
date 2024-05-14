@@ -50,6 +50,8 @@ void Renderer::draw() const
         ctViewportShader->use();
         ctViewportShader->setFloat("zLevel", viewport.getZLevel());
         ctViewportShader->setVec3("forward", viewport.getForward());
+        ctViewportShader->setFloat("minWindow", -2000.0f);
+        ctViewportShader->setFloat("maxWindow", 500.0f);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
