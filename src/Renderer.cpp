@@ -8,6 +8,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <iostream>
+
 Renderer& Renderer::instance()
 {
     static Renderer* inst = nullptr;
@@ -96,11 +98,11 @@ void Renderer::draw()
     mainViewportShader->use();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_Viewport1.getFrameBuffer().m_TexColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_Viewport1.getFrameBuffer().m_TexColorBuffers[0]);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_Viewport2.getFrameBuffer().m_TexColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_Viewport2.getFrameBuffer().m_TexColorBuffers[0]);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, m_Viewport3.getFrameBuffer().m_TexColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, m_Viewport3.getFrameBuffer().m_TexColorBuffers[0]);
 
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -110,17 +112,8 @@ void Renderer::draw()
 
 void Renderer::onScroll(const float yOffset)
 {
-    if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
-    {
-        m_Viewport1.onScroll(yOffset);
-    }
-    else if (m_LastMouseX >= RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
-    {
-        m_Viewport2.onScroll(yOffset);
-    }
-    else if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY >= RENDER_HEIGHT / 2)
-    {
-        m_Viewport3.onScroll(yOffset);
+    if (auto viewport = getViewportFromMousePosition()) {
+        viewport->onScroll(yOffset);
     }
 }
 
@@ -143,6 +136,69 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
 
     (void)xOffset;
     (void)yOffset;
+
+    m_LastHoveredValue = samplePixel(xPos, yPos);
+}
+
+std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) const
+{
+    const auto viewport = getViewportFromMousePosition();
+    if (!viewport) {
+        return {};
+    }
+    const auto& framebuffer = viewport->getFrameBuffer();
+
+    float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
+    float y = ((yPos - viewport->getWindowOffset().y) / viewport->getPixelHeight()) * viewport->getRenderHeight();
+
+    y = viewport->getRenderHeight() - y;
+
+    //std::cout << "input xpos: " << xPos << ", transformed: " << x << "\n";
+    //std::cout << "input ypos: " << yPos << ", transformed: " << y << "\n";
+
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
+    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    float value;
+    glReadPixels(uint32_t(x), uint32_t(y), 1, 1, GL_RED, GL_FLOAT, &value);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return { value };
+}
+
+Viewport* Renderer::getViewportFromMousePosition()
+{
+    if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
+    {
+        return &m_Viewport1;
+    }
+    else if (m_LastMouseX >= RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
+    {
+        return &m_Viewport2;
+    }
+    else if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY >= RENDER_HEIGHT / 2)
+    {
+        return &m_Viewport3;
+    }
+
+    return nullptr;
+}
+
+const Viewport* Renderer::getViewportFromMousePosition() const
+{
+    if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
+    {
+        return &m_Viewport1;
+    }
+    else if (m_LastMouseX >= RENDER_WIDTH / 2 && m_LastMouseY < RENDER_HEIGHT / 2)
+    {
+        return &m_Viewport2;
+    }
+    else if (m_LastMouseX < RENDER_WIDTH / 2 && m_LastMouseY >= RENDER_HEIGHT / 2)
+    {
+        return &m_Viewport3;
+    }
+
+    return nullptr;
 }
 
 void Renderer::drawImGui()
@@ -155,11 +211,21 @@ void Renderer::drawImGui()
     {
         const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
         ImGui::SetNextWindowPos({ RENDER_WIDTH / 2 + 50, RENDER_HEIGHT / 2 + 50 }, ImGuiCond_Always);
-        ImGui::SetNextWindowSize({ 600, 70 }, ImGuiCond_Always);
+        ImGui::SetNextWindowSize({ 600, 140 }, ImGuiCond_Always);
 
         ImGui::Begin("Settings", nullptr, flags);
         ImGui::SetWindowFontScale(1.5f);
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
+
+        if (m_LastHoveredValue) 
+        {
+            ImGui::Text((std::string("Sample: ") + std::to_string(*m_LastHoveredValue)).c_str());
+        }
+        else 
+        {
+            ImGui::Text((std::string("Sample: ")).c_str());
+        }
+        
 
         ImGui::End();
     }

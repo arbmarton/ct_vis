@@ -1,6 +1,7 @@
 #version 410 core
 
 out vec4 FragColor;
+out float SampledValue;
   
 in vec2 TexCoords;
 
@@ -28,4 +29,5 @@ void main()
 	float interpolation = (modifiedValue - minWindow) / (maxWindow - minWindow);
 
 	FragColor = vec4(interpolation, interpolation, interpolation, 1.0);
+	SampledValue = sampled.r;
 }

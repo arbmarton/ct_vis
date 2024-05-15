@@ -1,9 +1,12 @@
 #include "Viewport.h"
 
-Viewport::Viewport(const uint32_t width, const uint32_t height, const glm::vec3& forward, const float zLevel)
-    : m_Width(width)
-    , m_Height(height)
-    , m_BufferViewport(Framebuffer(width, height))
+Viewport::Viewport(const glm::ivec2& renderSize, const glm::vec2& pixelSize, const glm::ivec2& windowOffset, const glm::vec3& forward, const float zLevel)
+    : m_RenderWidth(renderSize[0])
+    , m_RenderHeight(renderSize[1])
+    , m_PixelWidth(pixelSize[0])
+    , m_PixelHeight(pixelSize[1])
+    , m_WindowOffset(windowOffset)
+    , m_BufferViewport(ViewportFramebuffer(renderSize[0], renderSize[1]))
     , m_Forward(forward)
     , m_zLevel(zLevel)
 {
