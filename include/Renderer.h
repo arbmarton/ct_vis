@@ -11,11 +11,12 @@ class Renderer
 {
 public:
     static Renderer& instance();
+    ~Renderer();
 
     constexpr static uint32_t RENDER_WIDTH = 512 * 3;
     constexpr static uint32_t RENDER_HEIGHT = 512 * 3;
 
-    void draw() const;
+    void draw();
     void onScroll(const float yOffset);
     void onMouseMove(const float xPos, const float yPos);
 
@@ -26,6 +27,9 @@ public:
 
 private:
     Renderer();
+
+    void drawImGui();
+
     constexpr static float m_QuadVertices[] = {
         // positions + texcoords
         -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f
@@ -42,4 +46,7 @@ private:
 
     float m_LastMouseX = RENDER_WIDTH / 2;
     float m_LastMouseY = RENDER_HEIGHT / 2;
+
+    int32_t m_HounsfieldWindowLow = -2000;
+    int32_t m_HounsfieldWindowHigh = 500;
 };

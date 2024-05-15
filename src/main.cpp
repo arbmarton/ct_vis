@@ -12,6 +12,7 @@
 #include "Utilities.h"
 #include "Bank.h"
 #include "DataTransform.h"
+#include "Globals.h"
 
 #include <iostream>
 #include <string>
@@ -56,6 +57,7 @@ int main(int argc, char** argv)
     }
     glfwMakeContextCurrent(context);
     glfwSetInputMode(context, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    Globals::instance().setOpenGLContext(context);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {

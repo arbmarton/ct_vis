@@ -1,6 +1,12 @@
 #include "Renderer.h"
 
 #include "Bank.h"
+#include "OpenGL.h"
+#include "Globals.h"
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 Renderer& Renderer::instance()
 {
@@ -30,9 +36,21 @@ Renderer::Renderer()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(Globals::instance().getOpenGLContext(), true);
+    ImGui_ImplOpenGL3_Init(OpenGlInfo::getVersionString().data());
 }
 
-void Renderer::draw() const
+Renderer::~Renderer()
+{
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}
+
+void Renderer::draw()
 {
     if (m_3DTexture == std::numeric_limits<GLuint>::max())
     {
@@ -50,8 +68,8 @@ void Renderer::draw() const
         ctViewportShader->use();
         ctViewportShader->setFloat("zLevel", viewport.getZLevel());
         ctViewportShader->setVec3("forward", viewport.getForward());
-        ctViewportShader->setFloat("minWindow", -2000.0f);
-        ctViewportShader->setFloat("maxWindow", 500.0f);
+        ctViewportShader->setFloat("minWindow", float(m_HounsfieldWindowLow));
+        ctViewportShader->setFloat("maxWindow", float(m_HounsfieldWindowHigh));
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
@@ -86,6 +104,8 @@ void Renderer::draw() const
 
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    drawImGui();
 }
 
 void Renderer::onScroll(const float yOffset)
@@ -123,4 +143,27 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
 
     (void)xOffset;
     (void)yOffset;
+}
+
+void Renderer::drawImGui()
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    {
+        const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+        ImGui::SetNextWindowPos({ RENDER_WIDTH / 2 + 50, RENDER_HEIGHT / 2 + 50 }, ImGuiCond_Always);
+        ImGui::SetNextWindowSize({ 600, 70 }, ImGuiCond_Always);
+
+        ImGui::Begin("Settings", nullptr, flags);
+        ImGui::SetWindowFontScale(1.5f);
+        ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
+
+        ImGui::End();
+    }
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

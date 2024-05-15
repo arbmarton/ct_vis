@@ -4,3 +4,6 @@
 [submodule "thirdparty/dcmtk"]
 	path = thirdparty/dcmtk
 	url = https://github.com/DCMTK/dcmtk.git
+[submodule "thirdparty/imgui"]
+	path = thirdparty/imgui
+	url = https://github.com/ocornut/imgui.git

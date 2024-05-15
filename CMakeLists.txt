@@ -24,11 +24,24 @@ if (APPLE)
 endif(APPLE)
 
 set(THIRDPARTY_HEADERS
-
+	thirdparty/imgui/imconfig.h
+	thirdparty/imgui/imgui.h
+	thirdparty/imgui/imgui_internal.h
+	thirdparty/imgui/imstb_rectpack.h
+	thirdparty/imgui/imstb_textedit.h
+	thirdparty/imgui/imstb_truetype.h
+	thirdparty/imgui/backends/imgui_impl_glfw.h
+	thirdparty/imgui/backends/imgui_impl_opengl3.h
 )
 
 set(THIRDPARTY_SOURCES
-
+	thirdparty/imgui/imgui.cpp
+	thirdparty/imgui/imgui_demo.cpp
+	thirdparty/imgui/imgui_draw.cpp
+	thirdparty/imgui/imgui_tables.cpp
+	thirdparty/imgui/imgui_widgets.cpp
+	thirdparty/imgui/backends/imgui_impl_glfw.cpp
+	thirdparty/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 set(HEADER_FILES
@@ -37,6 +50,7 @@ set(HEADER_FILES
 	include/DataTransform.h
 	include/Enums.h
 	include/Framebuffer.h
+	include/Globals.h
 	include/ImageLoader.h
 	include/ImageSet.h
 	include/OpenGL.h
@@ -66,6 +80,8 @@ set(SHADER_FILES
 )
 
 add_executable(${PROJECT_NAME}
+		       ${THIRDPARTY_HEADERS}
+			   ${THIRDPARTY_SOURCES}
 	           ${HEADER_FILES}
 			   ${SOURCE_FILES}
 			   ${SHADER_FILES}
@@ -84,7 +100,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/glm/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/include/
-						   
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/imgui/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/imgui/backends
 )
 
 if (APPLE)
@@ -131,6 +148,8 @@ else()
 endif()
 
 source_group("shaders" FILES ${SHADER_FILES})
+source_group("thirdparty" FILES ${THIRDPARTY_HEADERS})
+source_group("thirdparty sources" FILES ${THIRDPARTY_SOURCES})
 
 # Parallel compilation and C++17
 if(MSVC)
