@@ -22,6 +22,7 @@ void main()
 		up * ((1.0 - TexCoords.y) * 2.0 - 1.0) * 0.5 +
 		forward * (zLevel * 2.0 - 1.0) * 0.5;
 
+	// the texture only has a single channel, this is just syntax
 	vec4 sampled = texture(texture3D, samplingPosition);
 
 	float temp = max(sampled.r, minWindow);

@@ -217,15 +217,7 @@ void Renderer::drawImGui()
         ImGui::SetWindowFontScale(1.5f);
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
 
-        if (m_LastHoveredValue) 
-        {
-            ImGui::Text((std::string("Sample: ") + std::to_string(*m_LastHoveredValue)).c_str());
-        }
-        else 
-        {
-            ImGui::Text((std::string("Sample: ")).c_str());
-        }
-        
+        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", " + (m_LastHoveredValue ? std::to_string(*m_LastHoveredValue) : "---")).c_str());
 
         ImGui::End();
     }
