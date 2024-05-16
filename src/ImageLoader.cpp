@@ -53,6 +53,16 @@ ImageSet ImageLoader::load() const
             DcmFileFormat fileformat;
             fileformat.loadFile(currentPath.string().c_str());
             auto dataset = fileformat.getDataset();
+
+            Float64 pixelSpacing;
+            Float64 imagePosition;
+            Float64 sliceThickness;
+            Float64 spacingBetweenSlices;
+            dataset->findAndGetFloat64(DCM_PixelSpacing, pixelSpacing, 1);
+            dataset->findAndGetFloat64(DCM_ImagePositionPatient, imagePosition);
+            dataset->findAndGetFloat64(DCM_SliceThickness, sliceThickness);
+            dataset->findAndGetFloat64(DCM_SpacingBetweenSlices, spacingBetweenSlices);
+
             Float64 rescaleIntercept;
             Float64 rescaleSlope;
             dataset->findAndGetFloat64(DCM_RescaleSlope, rescaleSlope);
@@ -84,7 +94,8 @@ ImageSet ImageLoader::load() const
                     throw 0;
                 }
                 //std::cout << castedData[i] << " ";
-                floatData[i] = (castedData[i] * float(rescaleSlope)) + float(rescaleIntercept);
+                //floatData[i] = (castedData[i] * float(rescaleSlope)) + float(rescaleIntercept);
+                floatData[i] = float(castedData[i]);
             }
 
             {

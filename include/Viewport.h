@@ -12,7 +12,7 @@
 class Viewport
 {
 public:
-    Viewport(const glm::ivec2& renderSize, const glm::vec2& pixelSize, const glm::ivec2& windowOffset, const glm::vec3& forward, const float zLevel);
+    Viewport(const glm::ivec2& renderSize, const glm::vec2& pixelSize, const glm::ivec2& windowOffset, const glm::vec3& forward, const float zLevel, const glm::vec3& color);
 
     void onScroll(const float yOffset);
     const ViewportFramebuffer& getFrameBuffer() const
@@ -47,6 +47,10 @@ public:
     {
         return m_RenderHeight;
     }
+    glm::vec3 getColor() const
+    {
+        return m_Color;
+    }
 
 private:
     const uint32_t m_RenderWidth;
@@ -59,4 +63,6 @@ private:
 
     glm::vec3 m_Forward;
     float m_zLevel;
+
+    const glm::vec3 m_Color;
 };

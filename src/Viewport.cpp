@@ -1,6 +1,6 @@
 #include "Viewport.h"
 
-Viewport::Viewport(const glm::ivec2& renderSize, const glm::vec2& pixelSize, const glm::ivec2& windowOffset, const glm::vec3& forward, const float zLevel)
+Viewport::Viewport(const glm::ivec2& renderSize, const glm::vec2& pixelSize, const glm::ivec2& windowOffset, const glm::vec3& forward, const float zLevel, const glm::vec3& color)
     : m_RenderWidth(renderSize[0])
     , m_RenderHeight(renderSize[1])
     , m_PixelWidth(pixelSize[0])
@@ -9,6 +9,7 @@ Viewport::Viewport(const glm::ivec2& renderSize, const glm::vec2& pixelSize, con
     , m_BufferViewport(ViewportFramebuffer(renderSize[0], renderSize[1]))
     , m_Forward(forward)
     , m_zLevel(zLevel)
+    , m_Color(color)
 {
 }
 

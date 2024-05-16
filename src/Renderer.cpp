@@ -59,7 +59,7 @@ void Renderer::draw()
         throw 0;
     }
 
-    const auto renderViewport = [this](const Viewport& viewport) {
+    const auto renderViewport = [this](const Viewport& viewport, const Viewport& other1, const Viewport& other2) {
         const auto& framebuffer = viewport.getFrameBuffer();
         glViewport(0, 0, framebuffer.m_Width, framebuffer.m_Height);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
@@ -72,6 +72,13 @@ void Renderer::draw()
         ctViewportShader->setVec3("forward", viewport.getForward());
         ctViewportShader->setFloat("minWindow", float(m_HounsfieldWindowLow));
         ctViewportShader->setFloat("maxWindow", float(m_HounsfieldWindowHigh));
+        ctViewportShader->setVec3("viewportColor", viewport.getColor());
+        ctViewportShader->setVec3("otherColor1", other1.getColor());
+        ctViewportShader->setVec3("otherColor2", other2.getColor());
+        ctViewportShader->setVec3("otherForward1", other1.getForward());
+        ctViewportShader->setVec3("otherForward2", other2.getForward());
+        ctViewportShader->setFloat("otherZ1", other1.getZLevel());
+        ctViewportShader->setFloat("otherZ2", other2.getZLevel());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
@@ -80,9 +87,9 @@ void Renderer::draw()
         glDrawArrays(GL_TRIANGLES, 0, 6);
     };
 
-    renderViewport(m_Viewport1);
-    renderViewport(m_Viewport2);
-    renderViewport(m_Viewport3);
+    renderViewport(m_Viewport1, m_Viewport2, m_Viewport3);
+    renderViewport(m_Viewport2, m_Viewport1, m_Viewport3);
+    renderViewport(m_Viewport3, m_Viewport1, m_Viewport2);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 #ifdef __APPLE__  // TODO: check properly for a retina display somehow
@@ -148,7 +155,7 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
     }
     const auto& framebuffer = viewport->getFrameBuffer();
 
-    float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
+    const float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
     float y = ((yPos - viewport->getWindowOffset().y) / viewport->getPixelHeight()) * viewport->getRenderHeight();
 
     y = viewport->getRenderHeight() - y;
@@ -217,7 +224,8 @@ void Renderer::drawImGui()
         ImGui::SetWindowFontScale(1.5f);
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
 
-        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", " + (m_LastHoveredValue ? std::to_string(*m_LastHoveredValue) : "---")).c_str());
+        // TODO: use viewport coordinates instead of window coordinates
+        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---")).c_str());
 
         ImGui::End();
     }
