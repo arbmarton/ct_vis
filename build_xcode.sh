@@ -4,8 +4,8 @@ brew install xquartz
 git submodule update --init
 
 cd thirdparty/dcmtk
-mkdir -p out
-cd out
+mkdir -p build
+cd build
 
 cmake -G"Xcode" ${COMMON_CMAKE_CONFIG_PARAMS} ../
 cmake --build . --config Debug --parallel

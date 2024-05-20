@@ -90,7 +90,7 @@ add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME} PUBLIC
 						   ${CMAKE_CURRENT_LIST_DIR}/include/
 
-						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/config/include/
+						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/config/include/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/ofstd/include/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/oflog/include/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/dcmimgle/include/
@@ -117,11 +117,11 @@ endif(APPLE)
 
 if (APPLE)
     target_link_libraries(${PROJECT_NAME}
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/libdcmimgle.a
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/libdcmdata.a
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/libofstd.a
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/liboficonv.a
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/liboflog.a
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/libdcmimgle.a
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/libdcmdata.a
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/libofstd.a
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/liboficonv.a
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/liboflog.a
                           
                           ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glm/glm/$<CONFIG>/libglm_static.a
                           ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glfw-3.3/src/$<CONFIG>/libglfw3.a
@@ -135,10 +135,10 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework CoreVideo")
 else()
     target_link_libraries(${PROJECT_NAME}
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/dcmimgle.lib
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/dcmdata.lib
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/ofstd.lib
-                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/out/lib/$<CONFIG>/oflog.lib
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/dcmimgle.lib
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/dcmdata.lib
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/ofstd.lib
+                          ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/oflog.lib
 
 						  ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glm/glm/$<CONFIG>/glm_static.lib
 						  ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glfw-3.3/src/$<CONFIG>/glfw3.lib
