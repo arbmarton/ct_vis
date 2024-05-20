@@ -210,6 +210,11 @@ const Viewport* Renderer::getViewportFromMousePosition() const
 
 void Renderer::drawImGui()
 {
+#ifdef __APPLE__
+    constexpr float scaling = 1.0f;
+#else
+    constexpr float scaling = 1.5f;
+#endif
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -218,10 +223,10 @@ void Renderer::drawImGui()
     {
         const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
         ImGui::SetNextWindowPos({ RENDER_WIDTH / 2 + 50, RENDER_HEIGHT / 2 + 50 }, ImGuiCond_Always);
-        ImGui::SetNextWindowSize({ 600, 140 }, ImGuiCond_Always);
+        ImGui::SetNextWindowSize({ 400 * scaling, 100 * scaling }, ImGuiCond_Always);
 
         ImGui::Begin("Settings", nullptr, flags);
-        ImGui::SetWindowFontScale(1.5f);
+        ImGui::SetWindowFontScale(scaling);
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
 
         // TODO: use viewport coordinates instead of window coordinates
