@@ -14,8 +14,13 @@ public:
     static Renderer& instance();
     ~Renderer();
 
+#ifdef __APPLE__
+    constexpr static uint32_t RENDER_WIDTH = uint32_t(512 * 2);
+    constexpr static uint32_t RENDER_HEIGHT = uint32_t(512 * 2);
+#else
     constexpr static uint32_t RENDER_WIDTH = uint32_t(512 * 3.6);
     constexpr static uint32_t RENDER_HEIGHT = uint32_t(512 * 3.6);
+#endif
 
     void draw();
     void onScroll(const float yOffset);
