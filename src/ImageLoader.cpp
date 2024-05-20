@@ -46,7 +46,7 @@ ImageSet ImageLoader::load() const
             {
                 throw 0;
             }
-            if (img->getPhotometricInterpretation() != EPI_Monochrome2) 
+            if (img->getPhotometricInterpretation() != EPI_Monochrome2)
             {
                 throw 0;
             }
@@ -73,7 +73,8 @@ ImageSet ImageLoader::load() const
             const auto internalPixelDataPtr = img->getInterData()->getData();
             const auto internalRepresentation = img->getInterData()->getRepresentation();
 
-            if (internalRepresentation != EPR_Sint16) {
+            if (internalRepresentation != EPR_Sint16)
+            {
                 throw 0;
             }
 
@@ -89,8 +90,10 @@ ImageSet ImageLoader::load() const
             std::cout << "rescale slope: " << rescaleSlope << "\n";
             std::cout << "rescale intercept: " << rescaleIntercept << "\n";
 
-            for (size_t i = 0; i < width * height; ++i) {
-                if (castedData[i] < min || castedData[i] > max) {
+            for (size_t i = 0; i < width * height; ++i)
+            {
+                if (castedData[i] < min || castedData[i] > max)
+                {
                     throw 0;
                 }
                 //std::cout << castedData[i] << " ";
@@ -106,7 +109,7 @@ ImageSet ImageLoader::load() const
 
             img->setMinMaxWindow();
             const uint8_t* pixelData = static_cast<const uint8_t*>(img->getOutputData(8));
-            
+
             {
                 std::lock_guard<std::mutex> guard(pixelDataMutex);
                 memcpy(&ret.m_PixelData[width * height * iter], pixelData, width * height * sizeof(uint8_t));

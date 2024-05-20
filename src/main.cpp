@@ -21,18 +21,19 @@
 constexpr bool vsync = false;
 
 #ifdef __APPLE__
-const std::string folder = "/Users/marci/dev/ct_vis/dataset/3.000000-Recon 2 VENOGRAM AP-05356/";
+std::string folder = "/Users/marci/dev/ct_vis/dataset/3.000000-Recon 2 VENOGRAM AP-05356/";
 #else
-const std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/";
+std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/";
 //const std::string folder =
-    //"g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-00799/10-06-2008-NA-CT V ABDPEL-75914/3.000000-Recon 2 VENOGRAM AP-05356/";
+//"g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-00799/10-06-2008-NA-CT V ABDPEL-75914/3.000000-Recon 2 VENOGRAM AP-05356/";
 //const std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/test/";
 #endif
 
 int main(int argc, char** argv)
 {
-    (void)argc;
-    (void)argv;
+    if (argc > 1) {
+        folder = argv[1];
+    }
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OpenGlInfo::m_MajorVersion);
@@ -90,7 +91,6 @@ int main(int argc, char** argv)
     std::chrono::steady_clock::time_point qqqq = std::chrono::steady_clock::now();
 
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(qqqq - asd).count() << "[ms]" << std::endl;
-
 
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();

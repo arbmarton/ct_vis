@@ -31,7 +31,8 @@ namespace utils {
 
 std::vector<float> normalizeVector(const std::vector<float>& vec)
 {
-    if (vec.empty()) {
+    if (vec.empty())
+    {
         return vec;
     }
 
@@ -42,7 +43,8 @@ std::vector<float> normalizeVector(const std::vector<float>& vec)
     // Normalize each element in the vector
     std::vector<float> normalizedVec;
     normalizedVec.reserve(vec.size());
-    for (float value : vec) {
+    for (float value : vec)
+    {
         float normalizedValue = (value - minVal) / (maxVal - minVal);
         normalizedVec.push_back(normalizedValue);
     }
@@ -125,7 +127,7 @@ GLuint texture3DFromData(const std::vector<float>& vec)
     else
     {
         std::cout << "Texture failed to load at path: "
-            << "\n";
+                  << "\n";
     }
     return textureID;
 }

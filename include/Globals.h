@@ -24,6 +24,7 @@ public:
     {
         return m_Window;
     }
+
 private:
     GLFWwindow* m_Window{ nullptr };
 };

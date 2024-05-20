@@ -119,7 +119,8 @@ void Renderer::draw()
 
 void Renderer::onScroll(const float yOffset)
 {
-    if (auto viewport = getViewportFromMousePosition()) {
+    if (auto viewport = getViewportFromMousePosition())
+    {
         viewport->onScroll(yOffset);
     }
 }
@@ -150,7 +151,8 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
 std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) const
 {
     const auto viewport = getViewportFromMousePosition();
-    if (!viewport) {
+    if (!viewport)
+    {
         return {};
     }
     const auto& framebuffer = viewport->getFrameBuffer();
@@ -230,7 +232,9 @@ void Renderer::drawImGui()
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
 
         // TODO: use viewport coordinates instead of window coordinates
-        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---")).c_str());
+        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", "
+                     + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
+                        .c_str());
 
         ImGui::End();
     }
