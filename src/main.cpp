@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     glfwSetMouseButtonCallback(context, [](GLFWwindow* /*window*/, int /*button*/, int /*action*/, int /*mods*/) {});
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    const auto imageSet = ImageLoader(folder).load();
+    const auto imageSet = ImageLoader(folder, 1).load();
     //const auto test = data::transformHUtoPixels(imageSet.m_HounsfieldData, -2000, 500);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;

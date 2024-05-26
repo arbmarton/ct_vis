@@ -3,6 +3,8 @@
 #include "dcmtk/dcmimgle/dcmimage.h"
 #include <dcmtk/dcmdata/dctk.h>
 
+#include "Utilities.h"
+
 #include <thread>
 #include <mutex>
 
@@ -101,9 +103,12 @@ ImageSet ImageLoader::load() const
                 floatData[i] = float(castedData[i]);
             }
 
+            
+
             {
                 // TODO: it should be possible to eliminate floatData
                 std::lock_guard<std::mutex> guard(hounsfieldMutex);
+                floatData = utils::applyOpenCVLowPassFilter2D(floatData, width, height, 0.3f);
                 memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height * sizeof(float));
             }
 

@@ -19,6 +19,8 @@ uniform vec3 otherForward2;
 uniform float otherZ1;
 uniform float otherZ2;
 
+float borderWidth = 0.01f;
+
 void main()
 { 
 	vec3 right = normalize(cross(forward, vec3(0.0, 1.0, 0.0)));
@@ -48,7 +50,7 @@ void main()
 		sampled = texture(texture3D, samplingPosition);
 	}
 
-	if (TexCoords.x < 0.01 || TexCoords.x > 0.99 || TexCoords.y < 0.01 || TexCoords.y > 0.99) {
+	if (TexCoords.x < borderWidth || TexCoords.x > (1 - borderWidth) || TexCoords.y < borderWidth || TexCoords.y > (1 - borderWidth)) {
 		FragColor = vec4(viewportColor, 1.0);
 	}
 	else if (abs(dotProduct1) < 0.001) {

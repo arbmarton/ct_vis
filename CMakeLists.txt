@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(GLM_TEST_ENABLE OFF)
 if (MSVC)
     set_source_files_properties(thirdparty/imgui/backends/imgui_impl_opengl3.cpp PROPERTIES COMPILE_OPTIONS "/wd4701")
+    set_source_files_properties("$ENV{OpenCV_DIR}/../../include/opencv2/core/types.hpp" PROPERTIES COMPILE_OPTIONS "/wd4127")
 endif()
 
 if (APPLE)
@@ -105,6 +106,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glfw-3.3/include/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/imgui/
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/imgui/backends
+
+						   $ENV{OpenCV_DIR}/../../include/
 )
 
 if (APPLE)
@@ -147,6 +150,8 @@ else()
 						  ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glfw-3.3/src/$<CONFIG>/glfw3.lib
 					      ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glad/$<CONFIG>/glad.lib
 						  opengl32.dll
+
+						  $ENV{OpenCV_DIR}/lib/opencv_world490$<$<CONFIG:Debug>:d>.lib
     )
 endif()
 
@@ -167,6 +172,7 @@ if(WIN32)
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/bin/$<CONFIG>/ofstd.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/bin/$<CONFIG>/oflog.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/bin/$<CONFIG>/oficonv.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "$ENV{OpenCV_DIR}/bin/opencv_world490$<$<CONFIG:Debug>:d>.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
 		VERBATIM
 	)
 endif(WIN32)

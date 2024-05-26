@@ -17,10 +17,46 @@ class DicomImage;
 
 namespace utils {
 
+template<typename T>
+T findMinimum(T* data, const size_t length)
+{
+	T minimum = std::numeric_limits<T>::max();
+	for (size_t i = 0; i < length; ++i)
+	{
+		if (data[i] < minimum)
+		{
+			minimum = data[i];
+		}
+	}
+	return minimum;
+}
+
+template<typename T>
+T findMaximum(T* data, const size_t length)
+{
+	T maximum = std::numeric_limits<T>::lowest();
+	for (size_t i = 0; i < length; ++i)
+	{
+		if (data[i] > maximum)
+		{
+			maximum = data[i];
+		}
+	}
+	return maximum;
+}
+
+template<typename T>
+std::pair<T, T> findMinimumAndMaximum(T* data, const size_t length)
+{
+	return std::make_pair<T, T>(findMinimum(data, length), findMaximum(data, length));
+}
+
 std::vector<float> normalizeVector(const std::vector<float>& vec);
 GLuint textureFromDicomImage(DicomImage* img);
 GLuint texture3DFromData(const std::vector<uint8_t>& vec);
 GLuint texture3DFromData(const std::vector<float>& vec);
+
+std::vector<float> applyOpenCVLowPassFilter2D(const std::vector<float>& input, const uint32_t width, const uint32_t height, const float cutoff);
 
 std::filesystem::path getTempFolderPath();
 std::filesystem::path getShaderFolderPath();
