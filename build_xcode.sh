@@ -1,5 +1,6 @@
 brew install cmake
 brew install xquartz
+brew install opencv
 
 git submodule update --init
 

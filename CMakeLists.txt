@@ -25,6 +25,7 @@ if (APPLE)
     find_package(X11)
     find_package(ZLIB)
     find_package(OpenGL REQUIRED)
+    find_package(OpenCV REQUIRED)
 endif(APPLE)
 
 set(THIRDPARTY_HEADERS
@@ -114,6 +115,7 @@ if (APPLE)
     target_include_directories(${PROJECT_NAME} PUBLIC
                                "/opt/X11/include"
                                 ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad_macos/include/
+                                ${OpenCV_INCLUDE_DIRS}
     )
 else()
     target_include_directories(${PROJECT_NAME} PUBLIC
@@ -139,6 +141,7 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
     target_link_libraries(${PROJECT_NAME} "-framework IOKit")
     target_link_libraries(${PROJECT_NAME} "-framework CoreVideo")
+    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 else()
     target_link_libraries(${PROJECT_NAME}
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/dcmimgle.lib
