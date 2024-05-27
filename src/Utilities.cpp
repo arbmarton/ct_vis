@@ -36,6 +36,28 @@ constexpr int stoi_impl(const char* str, int value = 0)
     return *str ? is_digit(*str) ? stoi_impl(str + 1, (*str - '0') + value * 10) : throw "compile-time-error: not a digit" : value;
 }
 
+void fftShift(cv::Mat matrix)
+{
+    // crop if it has an odd number of rows or columns
+    matrix = matrix(cv::Rect(0, 0, matrix.cols & -2, matrix.rows & -2));
+
+    const uint32_t cx = matrix.cols / 2;
+    const uint32_t cy = matrix.rows / 2;
+
+    const cv::Mat q0(matrix, cv::Rect(0, 0, cx, cy));    // Top-Left - Create a ROI per quadrant
+    const cv::Mat q1(matrix, cv::Rect(cx, 0, cx, cy));   // Top-Right
+    const cv::Mat q2(matrix, cv::Rect(0, cy, cx, cy));   // Bottom-Left
+    const cv::Mat q3(matrix, cv::Rect(cx, cy, cx, cy));  // Bottom-Right
+
+    cv::Mat tmp;  // swap quadrants (Top-Left with Bottom-Right)
+    q0.copyTo(tmp);
+    q3.copyTo(q0);
+    tmp.copyTo(q3);
+    q1.copyTo(tmp);  // swap quadrant (Top-Right with Bottom-Left)
+    q2.copyTo(q1);
+    tmp.copyTo(q2);
+}
+
 namespace utils {
 
 std::vector<float> normalizeVector(const std::vector<float>& vec)
@@ -166,34 +188,26 @@ void fftShift(cv::Mat magI)
 
 std::vector<float> applyOpenCVLowPassFilter2D(const std::vector<float>& input, const uint32_t width, const uint32_t height, const float cutoff)
 {
-    (void)input;
-    //cv::Mat image = cv::imread("d:/Pictures/geoguesser.png", cv::IMREAD_GRAYSCALE);
-    //cv::Mat image(input, true);
-    //image.reshape(0, { int(height), int(width) });
-    cv::Mat floatMat(512, 512, CV_32F);
+    cv::Mat floatMat(height, width, CV_32F);
     memcpy(floatMat.data, input.data(), input.size() * sizeof(float));
 
     const int m = cv::getOptimalDFTSize(height);
-    const int n = cv::getOptimalDFTSize(width); // on the border add zero values
-    cv::Mat padded(m, n, CV_32F); //expand input image to optimal size
+    const int n = cv::getOptimalDFTSize(width);  // on the border add zero values
+    cv::Mat padded(m, n, CV_32F);                //expand input image to optimal size
     cv::copyMakeBorder(floatMat, padded, 0, m - height, 0, n - width, cv::BORDER_CONSTANT, cv::Scalar::all(0));
 
     cv::Mat planes[] = { padded, cv::Mat::zeros(padded.size(), CV_32F) };
     cv::Mat complexI;
-    cv::merge(planes, 2, complexI); // Add to the expanded another plane with zeros
-
+    cv::merge(planes, 2, complexI);  // Add to the expanded another plane with zeros
     cv::dft(complexI, complexI);
 
     cv::Mat mask = cv::Mat::zeros(planes[0].size(), planes[0].type());
-    int cx = complexI.cols / 2;
-    int cy = complexI.rows / 2;
-    // Create a circular mask
-    //float radius = 500.0; // Change this value to set the radius of the low-pass filter
-    cv::circle(mask, cv::Point(cx, cy), static_cast<int>(cx * sqrt(2) * cutoff), cv::Scalar(1, 1), -1);
+    const uint32_t cx = complexI.cols / 2;
+    const uint32_t cy = complexI.rows / 2;
 
-    cv::split(complexI, planes); // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
+    cv::circle(mask, cv::Point(cx, cy), static_cast<int>(cx * sqrt(2.0) * cutoff), cv::Scalar(1, 1), -1);
 
-
+    cv::split(complexI, planes);  // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
     fftShift(planes[0]);
     fftShift(planes[1]);
     planes[0] = planes[0].mul(mask);
@@ -202,51 +216,12 @@ std::vector<float> applyOpenCVLowPassFilter2D(const std::vector<float>& input, c
     fftShift(planes[1]);
     cv::merge(planes, 2, complexI);
 
-
-    //cv::magnitude(planes[0], planes[1], planes[0]);// planes[0] = magnitude
-    //cv::Mat magI = planes[0];
-    //
-    //magI += cv::Scalar::all(1); // switch to logarithmic scale
-    //cv::log(magI, magI);
-    //
-    //fftShift(magI);
-    //
-    //cv::normalize(magI, magI, 0, 1, cv::NORM_MINMAX); // Transform the matrix with float values into a
-    // viewable image form (float between values 0 and 1).
-
-    //cv::dft(complexI, complexI, cv::DFT_INVERSE);
-    //cv::Mat inv;
-    //cv::Mat planes2[] = {inv, cv::Mat::zeros(inv.size(), CV_32F)};
-    //cv::split(complexI, planes2);
-
     cv::Mat inverseTransform;
     cv::dft(complexI, inverseTransform, cv::DFT_INVERSE | cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
-    cv::normalize(inverseTransform, inverseTransform, 0, 255, cv::NORM_MINMAX);
-    inverseTransform.convertTo(inverseTransform, CV_8U);
 
-
-    cv::imshow("Input Image", floatMat); // Show the result
-    //cv::imshow("spectrum magnitude", magI);
-    cv::imshow("inverted", inverseTransform);
-    cv::waitKey();
-
-    // Shift back the zero frequency component to the original place
-    //q0 = cv::Mat(magI, cv::Rect(0, 0, cx, cy));   // Top-Left
-    //q1 = cv::Mat(magI, cv::Rect(cx, 0, cx, cy));  // Top-Right
-    //q2 = cv::Mat(magI, cv::Rect(0, cy, cx, cy));  // Bottom-Left
-    //q3 = cv::Mat(magI, cv::Rect(cx, cy, cx, cy)); // Bottom-Right
-    //
-    //q0.copyTo(tmp);
-    //q3.copyTo(q0);
-    //tmp.copyTo(q3);
-    //
-    //q1.copyTo(tmp);
-    //q2.copyTo(q1);
-    //tmp.copyTo(q2);
-    //
-    //cv::idft()
-
-    return {};
+    std::vector<float> ret;
+    ret.assign((float*)inverseTransform.datastart, (float*)inverseTransform.dataend);
+    return ret;
 }
 
 std::filesystem::path getTempFolderPath()

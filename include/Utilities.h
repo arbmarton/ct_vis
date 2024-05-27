@@ -17,38 +17,38 @@ class DicomImage;
 
 namespace utils {
 
-template<typename T>
+template <typename T>
 T findMinimum(T* data, const size_t length)
 {
-	T minimum = std::numeric_limits<T>::max();
-	for (size_t i = 0; i < length; ++i)
-	{
-		if (data[i] < minimum)
-		{
-			minimum = data[i];
-		}
-	}
-	return minimum;
+    T minimum = std::numeric_limits<T>::max();
+    for (size_t i = 0; i < length; ++i)
+    {
+        if (data[i] < minimum)
+        {
+            minimum = data[i];
+        }
+    }
+    return minimum;
 }
 
-template<typename T>
+template <typename T>
 T findMaximum(T* data, const size_t length)
 {
-	T maximum = std::numeric_limits<T>::lowest();
-	for (size_t i = 0; i < length; ++i)
-	{
-		if (data[i] > maximum)
-		{
-			maximum = data[i];
-		}
-	}
-	return maximum;
+    T maximum = std::numeric_limits<T>::lowest();
+    for (size_t i = 0; i < length; ++i)
+    {
+        if (data[i] > maximum)
+        {
+            maximum = data[i];
+        }
+    }
+    return maximum;
 }
 
-template<typename T>
+template <typename T>
 std::pair<T, T> findMinimumAndMaximum(T* data, const size_t length)
 {
-	return std::make_pair<T, T>(findMinimum(data, length), findMaximum(data, length));
+    return std::make_pair<T, T>(findMinimum(data, length), findMaximum(data, length));
 }
 
 std::vector<float> normalizeVector(const std::vector<float>& vec);

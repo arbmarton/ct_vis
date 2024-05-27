@@ -64,7 +64,7 @@ private:
         glm::ivec2(512, 512),
         glm::vec2(RENDER_WIDTH / 2, RENDER_HEIGHT / 2),
         glm::ivec2(0, RENDER_HEIGHT / 2),
-        glm::normalize(glm::vec3(0.01f, 0.99f, 0.0f)),
+        glm::normalize(glm::vec3(0.0001f, 0.9999f, 0.0f)),
         0.5f,
         glm::vec3(0, 0, 1));
 

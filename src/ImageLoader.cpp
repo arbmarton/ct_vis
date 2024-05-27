@@ -20,6 +20,7 @@ ImageSet ImageLoader::load() const
     std::mutex dicomImageMutex;
     std::mutex pixelDataMutex;
     std::mutex hounsfieldMutex;
+    std::mutex postprocessMutex;
 
     std::vector<std::filesystem::path> dicomDirectoryEntries;
     for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(m_Folder))
@@ -37,6 +38,7 @@ ImageSet ImageLoader::load() const
 
     ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret.m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
+    ret.m_PostprocessedData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret.m_DicomImages.resize(dicomDirectoryEntries.size());
 
     const auto threadLambda = [&](const uint32_t threadID) {
@@ -103,13 +105,16 @@ ImageSet ImageLoader::load() const
                 floatData[i] = float(castedData[i]);
             }
 
-            
-
             {
                 // TODO: it should be possible to eliminate floatData
                 std::lock_guard<std::mutex> guard(hounsfieldMutex);
-                floatData = utils::applyOpenCVLowPassFilter2D(floatData, width, height, 0.3f);
                 memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height * sizeof(float));
+            }
+
+            {
+                const auto postProcessed = utils::applyOpenCVLowPassFilter2D(floatData, width, height, 1.0f);
+                std::lock_guard<std::mutex> guard(postprocessMutex);
+                memcpy(&ret.m_PostprocessedData[width * height * iter], postProcessed.data(), width * height * sizeof(float));
             }
 
             img->setMinMaxWindow();
