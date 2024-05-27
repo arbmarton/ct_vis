@@ -21,24 +21,27 @@ uniform float otherZ2;
 
 float borderWidth = 0.01f;
 
+vec3 center = vec3(0.5, 0.5, 0.5);
+
+float calculateViewingAngleForOtherViewport(vec3 samplingPosition, vec3 otherForward, float otherZ)
+{
+	vec3 otherPoint = center + otherForward * (otherZ * 2.0 - 1.0) * 0.5;
+	vec3 diff = otherPoint - samplingPosition;
+	return dot(diff, otherForward);
+}
+
 void main()
 { 
 	vec3 right = normalize(cross(forward, vec3(0.0, 1.0, 0.0)));
 	vec3 up = normalize(cross(right, forward));
-	vec3 center = vec3(0.5, 0.5, 0.5);
-
-	vec3 otherPoint1 = center + otherForward1 * (otherZ1 * 2.0 - 1.0) * 0.5;
-	vec3 otherPoint2 = center + otherForward2 * (otherZ2 * 2.0 - 1.0) * 0.5;
 
 	vec3 samplingPosition = center + 
 		right * (TexCoords.x * 2.0 - 1.0) * 0.5 + 
 		up * ((1.0 - TexCoords.y) * 2.0 - 1.0) * 0.5 +
 		forward * (zLevel * 2.0 - 1.0) * 0.5;
-
-	vec3 diff1 = otherPoint1 - samplingPosition;
-	vec3 diff2 = otherPoint2 - samplingPosition;
-	float dotProduct1 = dot(diff1, otherForward1);
-	float dotProduct2 = dot(diff2, otherForward2);
+;
+	float dotProduct1 = calculateViewingAngleForOtherViewport(samplingPosition, otherForward1, otherZ1);
+	float dotProduct2 = calculateViewingAngleForOtherViewport(samplingPosition, otherForward2, otherZ2);
 
 	vec4 sampled;
 	if (any(greaterThan(samplingPosition, vec3(1.0))) || any(lessThan(samplingPosition, vec3(0.0)))) {
