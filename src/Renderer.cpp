@@ -39,6 +39,8 @@ Renderer::Renderer()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+    m_PostprocessOutput = utils::generateDataTexture(512, 512);
+
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(Globals::instance().getOpenGLContext(), true);
@@ -60,9 +62,9 @@ void Renderer::draw()
     }
 
     const auto renderViewport = [this](const Viewport& viewport, const Viewport& other1, const Viewport& other2) {
-        const auto& framebuffer = viewport.getFrameBuffer();
-        glViewport(0, 0, framebuffer.m_Width, framebuffer.m_Height);
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
+        const auto& dataframebuffer = viewport.getDataFrameBuffer();
+        glViewport(0, 0, dataframebuffer.m_Width, dataframebuffer.m_Height);
+        glBindFramebuffer(GL_FRAMEBUFFER, dataframebuffer.m_FrameBuffer);
         glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -70,18 +72,40 @@ void Renderer::draw()
         ctViewportShader->use();
         ctViewportShader->setFloat("zLevel", viewport.getZLevel());
         ctViewportShader->setVec3("forward", viewport.getForward());
-        ctViewportShader->setFloat("minWindow", float(m_HounsfieldWindowLow));
-        ctViewportShader->setFloat("maxWindow", float(m_HounsfieldWindowHigh));
-        ctViewportShader->setVec3("viewportColor", viewport.getColor());
-        ctViewportShader->setVec3("otherColor1", other1.getColor());
-        ctViewportShader->setVec3("otherColor2", other2.getColor());
-        ctViewportShader->setVec3("otherForward1", other1.getForward());
-        ctViewportShader->setVec3("otherForward2", other2.getForward());
-        ctViewportShader->setFloat("otherZ1", other1.getZLevel());
-        ctViewportShader->setFloat("otherZ2", other2.getZLevel());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
+
+        glBindVertexArray(m_QuadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        const auto v = utils::getTextureData(dataframebuffer.m_TexColorBuffer, dataframebuffer.m_Width, dataframebuffer.m_Height);
+        const auto transformed = utils::applyOpenCVLowPassFilter2D(v, dataframebuffer.m_Width, dataframebuffer.m_Height, m_FFTThreshold);
+
+        utils::updateTextureData(m_PostprocessOutput, dataframebuffer.m_Width, dataframebuffer.m_Height, transformed);
+
+        const auto& colorFramebuffer = viewport.getColorFrameBuffer();
+        glViewport(0, 0, colorFramebuffer.m_Width, colorFramebuffer.m_Height);
+        glBindFramebuffer(GL_FRAMEBUFFER, colorFramebuffer.m_FrameBuffer);
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        const auto& ctPostprocessShader = ShaderBank::instance().getValue(ShaderType::CtViewportPostprocess);
+        ctPostprocessShader->use();
+        ctPostprocessShader->setFloat("zLevel", viewport.getZLevel());
+        ctPostprocessShader->setVec3("forward", viewport.getForward());
+        ctPostprocessShader->setFloat("minWindow", float(m_HounsfieldWindowLow));
+        ctPostprocessShader->setFloat("maxWindow", float(m_HounsfieldWindowHigh));
+        ctPostprocessShader->setVec3("viewportColor", viewport.getColor());
+        ctPostprocessShader->setVec3("otherColor1", other1.getColor());
+        ctPostprocessShader->setVec3("otherColor2", other2.getColor());
+        ctPostprocessShader->setVec3("otherForward1", other1.getForward());
+        ctPostprocessShader->setVec3("otherForward2", other2.getForward());
+        ctPostprocessShader->setFloat("otherZ1", other1.getZLevel());
+        ctPostprocessShader->setFloat("otherZ2", other2.getZLevel());
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_PostprocessOutput);
 
         glBindVertexArray(m_QuadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -105,11 +129,11 @@ void Renderer::draw()
     mainViewportShader->use();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_Viewport1.getFrameBuffer().m_TexColorBuffers[0]);
+    glBindTexture(GL_TEXTURE_2D, m_Viewport1.getColorFrameBuffer().m_TexColorBuffer);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_Viewport2.getFrameBuffer().m_TexColorBuffers[0]);
+    glBindTexture(GL_TEXTURE_2D, m_Viewport2.getColorFrameBuffer().m_TexColorBuffer);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, m_Viewport3.getFrameBuffer().m_TexColorBuffers[0]);
+    glBindTexture(GL_TEXTURE_2D, m_Viewport3.getColorFrameBuffer().m_TexColorBuffer);
 
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -155,7 +179,7 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
     {
         return {};
     }
-    const auto& framebuffer = viewport->getFrameBuffer();
+    const auto& framebuffer = viewport->getDataFrameBuffer();
 
     const float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
     float y = ((yPos - viewport->getWindowOffset().y) / viewport->getPixelHeight()) * viewport->getRenderHeight();
@@ -166,7 +190,7 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
     //std::cout << "input ypos: " << yPos << ", transformed: " << y << "\n";
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
-    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
     float value;
     glReadPixels(uint32_t(x), uint32_t(y), 1, 1, GL_RED, GL_FLOAT, &value);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -230,6 +254,8 @@ void Renderer::drawImGui()
         ImGui::Begin("Settings", nullptr, flags);
         ImGui::SetWindowFontScale(scaling);
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
+
+        ImGui::DragFloat("FFT", &m_FFTThreshold, 0.001f, 0.1f, 1.0f);
 
         // TODO: use viewport coordinates instead of window coordinates
         ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", "

@@ -93,7 +93,7 @@ GLuint textureFromDicomImage(DicomImage* img)
     if (data)
     {
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, img->getWidth(), img->getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -106,6 +106,23 @@ GLuint textureFromDicomImage(DicomImage* img)
         std::cout << "Texture failed to load at path: "
                   << "\n";
     }
+    return textureID;
+}
+
+GLuint generateDataTexture(const uint32_t width, const uint32_t height)
+{
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     return textureID;
 }
 
@@ -163,27 +180,24 @@ GLuint texture3DFromData(const std::vector<float>& vec)
     return textureID;
 }
 
-
-void fftShift(cv::Mat magI)
+std::vector<float> getTextureData(const GLuint id, const uint32_t width, const uint32_t height)
 {
-    // crop if it has an odd number of rows or columns
-    magI = magI(cv::Rect(0, 0, magI.cols & -2, magI.rows & -2));
+    glBindTexture(GL_TEXTURE_2D, id);
 
-    int cx = magI.cols / 2;
-    int cy = magI.rows / 2;
+    std::vector<float> ret;
+    ret.resize(width * height);
 
-    cv::Mat q0(magI, cv::Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
-    cv::Mat q1(magI, cv::Rect(cx, 0, cx, cy));  // Top-Right
-    cv::Mat q2(magI, cv::Rect(0, cy, cx, cy));  // Bottom-Left
-    cv::Mat q3(magI, cv::Rect(cx, cy, cx, cy)); // Bottom-Right
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, ret.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    cv::Mat tmp;                            // swap quadrants (Top-Left with Bottom-Right)
-    q0.copyTo(tmp);
-    q3.copyTo(q0);
-    tmp.copyTo(q3);
-    q1.copyTo(tmp);                     // swap quadrant (Top-Right with Bottom-Left)
-    q2.copyTo(q1);
-    tmp.copyTo(q2);
+    return ret;
+}
+
+void updateTextureData(const GLuint id, const uint32_t width, const uint32_t height, const std::vector<float>& data)
+{
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED, GL_FLOAT, data.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 std::vector<float> applyOpenCVLowPassFilter2D(const std::vector<float>& input, const uint32_t width, const uint32_t height, const float cutoff)

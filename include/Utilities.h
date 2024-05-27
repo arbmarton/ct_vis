@@ -53,8 +53,11 @@ std::pair<T, T> findMinimumAndMaximum(T* data, const size_t length)
 
 std::vector<float> normalizeVector(const std::vector<float>& vec);
 GLuint textureFromDicomImage(DicomImage* img);
+GLuint generateDataTexture(const uint32_t width, const uint32_t height);
 GLuint texture3DFromData(const std::vector<uint8_t>& vec);
 GLuint texture3DFromData(const std::vector<float>& vec);
+std::vector<float> getTextureData(const GLuint id, const uint32_t width, const uint32_t height);
+void updateTextureData(const GLuint id, const uint32_t width, const uint32_t height, const std::vector<float>& data);
 
 std::vector<float> applyOpenCVLowPassFilter2D(const std::vector<float>& input, const uint32_t width, const uint32_t height, const float cutoff);
 

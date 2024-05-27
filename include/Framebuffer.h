@@ -24,6 +24,17 @@ struct Framebuffer : public IFramebuffer
     GLuint m_TexColorBuffer;
 };
 
+struct FloatFramebuffer : public IFramebuffer
+{
+    FloatFramebuffer(const uint32_t width, const uint32_t height);
+    FloatFramebuffer(const FloatFramebuffer& rhs) = delete;
+    FloatFramebuffer(FloatFramebuffer&& rhs) = delete;
+    FloatFramebuffer& operator=(const FloatFramebuffer& rhs) = delete;
+    FloatFramebuffer& operator=(FloatFramebuffer&& rhs) = delete;
+
+    GLuint m_TexColorBuffer;
+};
+
 struct ViewportFramebuffer : public IFramebuffer
 {
     ViewportFramebuffer(const uint32_t width, const uint32_t height);

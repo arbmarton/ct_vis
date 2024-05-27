@@ -85,6 +85,9 @@ inline std::unique_ptr<Shader>& Bank<ShaderType, std::unique_ptr<Shader>>::getVa
             case ShaderType::CtViewport:
                 addValue(key, std::make_unique<CtViewportShader>());
                 break;
+            case ShaderType::CtViewportPostprocess:
+                addValue(key, std::make_unique<CtViewportPostprocessShader>());
+                break;
             case ShaderType::MainViewport:
                 addValue(key, std::make_unique<MainViewportShader>());
                 break;

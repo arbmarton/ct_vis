@@ -7,6 +7,7 @@
 #include <cinttypes>
 #include <limits>
 #include <optional>
+#include <vector>
 
 class Renderer
 {
@@ -70,10 +71,12 @@ private:
 
 #undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
     GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
+    GLuint m_PostprocessOutput = std::numeric_limits<GLuint>::max();
 
     float m_LastMouseX = RENDER_WIDTH / 2;
     float m_LastMouseY = RENDER_HEIGHT / 2;
 
+    float m_FFTThreshold = 1.0f;
     int32_t m_HounsfieldWindowLow = -1000;
     int32_t m_HounsfieldWindowHigh = 500;
 

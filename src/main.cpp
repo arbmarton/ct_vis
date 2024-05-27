@@ -86,6 +86,7 @@ int main(int argc, char** argv)
     std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(asd - end).count() << "[ms]" << std::endl;
 
     ShaderBank::instance().getValue(ShaderType::CtViewport);
+    ShaderBank::instance().getValue(ShaderType::CtViewportPostprocess);
     ShaderBank::instance().getValue(ShaderType::MainViewport);
 
     std::chrono::steady_clock::time_point qqqq = std::chrono::steady_clock::now();

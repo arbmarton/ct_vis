@@ -106,6 +106,17 @@ public:
     void setValues() const override;
 };
 
+class CtViewportPostprocessShader : public Shader
+{
+public:
+    CtViewportPostprocessShader()
+        : Shader(ShaderType::CtViewportPostprocess)
+    {
+    }
+
+    void setValues() const override;
+};
+
 class MainViewportShader : public Shader
 {
 public:

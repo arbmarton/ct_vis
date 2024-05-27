@@ -21,9 +21,13 @@ public:
         const glm::vec3& color);
 
     void onScroll(const float yOffset);
-    const ViewportFramebuffer& getFrameBuffer() const
+    const FloatFramebuffer& getDataFrameBuffer() const
     {
-        return m_BufferViewport;
+        return m_Databuffer;
+    }
+    const Framebuffer& getColorFrameBuffer() const
+    {
+        return m_Colorbuffer;
     }
     glm::vec3 getForward() const
     {
@@ -65,7 +69,8 @@ private:
     const float m_PixelHeight;
     const glm::ivec2 m_WindowOffset;
 
-    const ViewportFramebuffer m_BufferViewport;
+    const FloatFramebuffer m_Databuffer;
+    const Framebuffer m_Colorbuffer;
 
     glm::vec3 m_Forward;
     float m_zLevel;

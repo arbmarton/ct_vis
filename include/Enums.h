@@ -41,6 +41,7 @@ enum class ShaderType
 {
     Basic,
     CtViewport,
+    CtViewportPostprocess,
     MainViewport,
     None
 };
@@ -55,6 +56,8 @@ inline std::string shaderTypeToString(const ShaderType type)
             return "ct_viewport";
         case ShaderType::MainViewport:
             return "main_viewport";
+        case ShaderType::CtViewportPostprocess:
+            return "ct_viewport_postprocess";
     }
 
     throw std::exception();

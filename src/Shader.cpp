@@ -257,6 +257,11 @@ void CtViewportShader::setValues() const
     setInt("texture3D", 0);
 }
 
+void CtViewportPostprocessShader::setValues() const
+{
+    setInt("textureInput", 0);
+}
+
 void MainViewportShader::setValues() const
 {
     setInt("viewport1", 0);
