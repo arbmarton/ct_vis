@@ -69,6 +69,7 @@ set(SOURCE_FILES
 	src/BasicDraw.cpp
 	src/DataTransform.cpp
 	src/ImageLoader.cpp
+	src/ImageSet.cpp
 	src/Framebuffer.cpp
 	src/main.cpp
 	src/Renderer.cpp

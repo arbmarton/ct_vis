@@ -8,6 +8,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include "gtx/string_cast.hpp"
+
 #include <iostream>
 
 Renderer& Renderer::instance()
@@ -79,10 +82,16 @@ void Renderer::draw()
         glBindVertexArray(m_QuadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        const auto v = utils::getTextureData(dataframebuffer.m_TexColorBuffer, dataframebuffer.m_Width, dataframebuffer.m_Height);
-        const auto transformed = utils::applyOpenCVLowPassFilter2D(v, dataframebuffer.m_Width, dataframebuffer.m_Height, m_FFTThreshold);
+        //std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        //const auto v = utils::getTextureData(dataframebuffer.m_TexColorBuffer, dataframebuffer.m_Width, //dataframebuffer.m_Height);
+        //
+        //const auto transformed = utils::applyOpenCVLowPassFilter2D(v, dataframebuffer.m_Width, //dataframebuffer.m_Height, m_FFTThreshold);
+        //std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - //begin).count() << "[ms]" << std::endl;
+        //
+        //
+        //utils::updateTextureData(m_PostprocessOutput, dataframebuffer.m_Width, dataframebuffer.m_Height, transformed);
 
-        utils::updateTextureData(m_PostprocessOutput, dataframebuffer.m_Width, dataframebuffer.m_Height, transformed);
 
         const auto& colorFramebuffer = viewport.getColorFrameBuffer();
         glViewport(0, 0, colorFramebuffer.m_Width, colorFramebuffer.m_Height);
@@ -105,7 +114,7 @@ void Renderer::draw()
         ctPostprocessShader->setFloat("otherZ2", other2.getZLevel());
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_PostprocessOutput);
+        glBindTexture(GL_TEXTURE_2D, dataframebuffer.m_TexColorBuffer);
 
         glBindVertexArray(m_QuadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -179,23 +188,37 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
     {
         return {};
     }
-    const auto& framebuffer = viewport->getDataFrameBuffer();
+    //const auto& framebuffer = viewport->getDataFrameBuffer();
 
-    const float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
+    float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
     float y = ((yPos - viewport->getWindowOffset().y) / viewport->getPixelHeight()) * viewport->getRenderHeight();
 
-    y = viewport->getRenderHeight() - y;
+    //y = viewport->getRenderHeight() - y;
 
-    //std::cout << "input xpos: " << xPos << ", transformed: " << x << "\n";
-    //std::cout << "input ypos: " << yPos << ", transformed: " << y << "\n";
+    x /= viewport->getRenderWidth();
+    y /= viewport->getRenderHeight();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-    float value;
-    glReadPixels(uint32_t(x), uint32_t(y), 1, 1, GL_RED, GL_FLOAT, &value);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    std::cout << "input xpos: " << xPos << ", transformed: " << x << "\n";
+    std::cout << "input ypos: " << yPos << ", transformed: " << y << "\n";
 
-    return { value };
+    //glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
+    //glReadBuffer(GL_COLOR_ATTACHMENT0);
+    //float value;
+    //glReadPixels(uint32_t(x), uint32_t(y), 1, 1, GL_RED, GL_FLOAT, &value);
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //return { value };
+    const auto forw = viewport->getForward();
+    glm::vec3 center = glm::vec3(0.5, 0.5, 0.5);
+    glm::vec3 right = glm::normalize(glm::cross(viewport->getForward(), glm::vec3(0.0, 1.0, 0.0)));
+    glm::vec3 up = glm::normalize(glm::cross(right, viewport->getForward()));
+    glm::vec3 samplingPosition = center +
+        right * (x * 2.0f - 1.0f) * 0.5f +
+        up * ((y) * 2.0f - 1.0f) * 0.5f +
+        viewport->getForward() * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
+
+    std::cout << glm::to_string(samplingPosition) << "\n";
+    return m_ImageSet->sampleHounsfieldData(samplingPosition);
 }
 
 Viewport* Renderer::getViewportFromMousePosition()

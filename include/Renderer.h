@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Viewport.h"
+#include "ImageSet.h"
 
 #include "glad/glad.h"
 
@@ -31,6 +32,10 @@ public:
     {
         m_3DTexture = texture;
     }
+    void setImageSet(ImageSet* imgset)
+    {
+        m_ImageSet = imgset;
+    }
 
 private:
     Renderer();
@@ -51,7 +56,7 @@ private:
         glm::ivec2(512, 512),
         glm::vec2(RENDER_WIDTH / 2, RENDER_HEIGHT / 2),
         glm::ivec2(0, 0),
-        glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)),
+        glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)),
         0.0f,
         glm::vec3(1, 0, 0));
     Viewport m_Viewport2 = Viewport(
@@ -69,6 +74,7 @@ private:
         0.5f,
         glm::vec3(0, 0, 1));
 
+    ImageSet* m_ImageSet = nullptr;
 #undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
     GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
     GLuint m_PostprocessOutput = std::numeric_limits<GLuint>::max();

@@ -20,6 +20,7 @@ namespace utils {
 template <typename T>
 T findMinimum(T* data, const size_t length)
 {
+#undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
     T minimum = std::numeric_limits<T>::max();
     for (size_t i = 0; i < length; ++i)
     {
