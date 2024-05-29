@@ -10,13 +10,21 @@
 
 class DicomImage;
 
-struct ImageSet
+class ImageSet
 {
-    ~ImageSet();
-    std::vector<std::unique_ptr<DicomImage>> m_DicomImages;
-    std::vector<uint8_t> m_PixelData;
-    std::vector<float> m_HounsfieldData;
+    friend class ImageLoader;
 
+public:
+    ~ImageSet();
+
+    const std::vector<std::unique_ptr<DicomImage>>& getDicomImages() const
+    {
+        return m_DicomImages;
+    }
+    const std::vector<float>& getHounsfieldData() const
+    {
+        return m_HounsfieldData;
+    }
     const std::vector<float>& getPostProcessedData() const;
     std::vector<float>& getPostProcessedData();
 
@@ -27,5 +35,7 @@ struct ImageSet
     uint32_t getHeight() const;
 
 private:
+    std::vector<std::unique_ptr<DicomImage>> m_DicomImages;
+    std::vector<float> m_HounsfieldData;
     std::vector<float> m_PostprocessedData;
 };

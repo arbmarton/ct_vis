@@ -28,7 +28,7 @@ public:
     void draw();
     void onScroll(const float yOffset);
     void onMouseMove(const float xPos, const float yPos);
-    void onMouseButton(int button, int action, int mods);
+    void onMouseButton(const int button, const int action, const int mods);
 
     void setImageSet(std::unique_ptr<ImageSet> imgset);
 

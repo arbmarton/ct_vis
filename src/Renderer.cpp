@@ -67,7 +67,8 @@ void Renderer::draw()
         throw 0;
     }
 
-    if (m_NeedUpload) {
+    if (m_NeedUpload)
+    {
         uploadNew3DTexture();
     }
 
@@ -179,7 +180,7 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
     m_LastHoveredValue = samplePixel(xPos, yPos);
 }
 
-void Renderer::onMouseButton(int button, int action, int /*mods*/)
+void Renderer::onMouseButton(const int button, const int action, const int /*mods*/)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT)
     {
@@ -197,7 +198,7 @@ void Renderer::onMouseButton(int button, int action, int /*mods*/)
 void Renderer::setImageSet(std::unique_ptr<ImageSet> imgset)
 {
     m_ImageSet = std::move(imgset);
-    m_3DTexture = utils::texture3DFromData(m_ImageSet->m_HounsfieldData);
+    m_3DTexture = utils::texture3DFromData(m_ImageSet->getHounsfieldData());
 }
 
 std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) const
@@ -309,7 +310,7 @@ void Renderer::drawImGui()
                 {
                     std::cout << "Slider adjustment ended with value: " << m_FFTThreshold << std::endl;
                 }
-                
+
                 std::thread thread([this] {
                     m_ImageSet->applyPostprocessing(m_FFTThreshold);
 
@@ -319,7 +320,8 @@ void Renderer::drawImGui()
                     glBufferData(GL_PIXEL_UNPACK_BUFFER, m_ImageSet->getByteSize(), nullptr, GL_STREAM_DRAW);
 
                     void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-                    if (ptr) {
+                    if (ptr)
+                    {
                         // Copy the texture data to the PBO
                         memcpy(ptr, m_ImageSet->getPostProcessedData().data(), m_ImageSet->getByteSize());
                         glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
@@ -336,8 +338,8 @@ void Renderer::drawImGui()
         }
 
         // TODO: use viewport coordinates instead of window coordinates
-        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", Hounsfield value: "
-                     + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
+        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY))
+                     + ", Hounsfield value: " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
                         .c_str());
 
         ImGui::End();
@@ -351,27 +353,10 @@ void Renderer::uploadNew3DTexture()
 {
     OpenGLLockGuard lock;
 
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
-    //glBufferData(GL_PIXEL_UNPACK_BUFFER, m_ImageSet->getByteSize(), nullptr, GL_STREAM_DRAW);
-    //
-    //void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-    //if (ptr) {
-    //    // Copy the texture data to the PBO
-    //    memcpy(ptr, m_ImageSet->getPostProcessedData().data(), m_ImageSet->getByteSize());
-    //    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    //}
-
-
-    //const auto test = data::transformHUtoPixels(imageSet.m_HounsfieldData, -2000, 500);
-
-
     glBindTexture(GL_TEXTURE_3D, m_3DTexture);
-    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->m_DicomImages.size()), GL_RED, GL_FLOAT, 0);
-
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
-
+    glTexSubImage3D(
+        GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->getDicomImages().size()), GL_RED, GL_FLOAT, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     m_NeedUpload = false;

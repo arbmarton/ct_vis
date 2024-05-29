@@ -12,7 +12,6 @@ std::mutex mutex;
 
 ImageSet::~ImageSet()
 {
-
 }
 
 const std::vector<float>& ImageSet::getPostProcessedData() const

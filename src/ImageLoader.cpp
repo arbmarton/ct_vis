@@ -32,7 +32,6 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
     // Force alphebetical order
     std::sort(dicomDirectoryEntries.begin(), dicomDirectoryEntries.end());
 
-    ret->m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret->m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret->getPostProcessedData().resize(512 * 512 * dicomDirectoryEntries.size());
     ret->m_DicomImages.resize(dicomDirectoryEntries.size());
@@ -105,11 +104,6 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
 
             const auto postProcessed = utils::applyOpenCVLowPassFilter2D(floatData.data(), width, height, 1.0f);
             memcpy(&ret->getPostProcessedData()[width * height * iter], postProcessed.data(), width * height * sizeof(float));
-
-            img->setMinMaxWindow();
-            const uint8_t* pixelData = static_cast<const uint8_t*>(img->getOutputData(8));
-
-            memcpy(&ret->m_PixelData[width * height * iter], pixelData, width * height * sizeof(uint8_t));
 
             ret->m_DicomImages[iter] = std::move(img);
         }
