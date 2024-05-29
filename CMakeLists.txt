@@ -59,6 +59,7 @@ set(HEADER_FILES
 	include/ImageLoader.h
 	include/ImageSet.h
 	include/OpenGL.h
+	include/OpenGLMutex.h
 	include/Renderer.h
 	include/Shader.h
 	include/Utilities.h
@@ -72,6 +73,7 @@ set(SOURCE_FILES
 	src/ImageSet.cpp
 	src/Framebuffer.cpp
 	src/main.cpp
+	src/OpenGLMutex.cpp
 	src/Renderer.cpp
 	src/Shader.cpp
 	src/Utilities.cpp

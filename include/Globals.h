@@ -1,5 +1,7 @@
 #pragma once
 
+#include "OpenGLMutex.h"
+
 struct GLFWwindow;
 
 class Globals
@@ -25,6 +27,12 @@ public:
         return m_Window;
     }
 
+    OpenGLMutex& getOpenGLMutex()
+    {
+        return m_OpenGLmutex;
+    }
+
 private:
     GLFWwindow* m_Window{ nullptr };
+    OpenGLMutex m_OpenGLmutex;
 };

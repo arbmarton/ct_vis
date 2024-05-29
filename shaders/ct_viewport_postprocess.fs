@@ -20,6 +20,7 @@ uniform float otherZ2;
 
 float borderWidth = 0.005f;
 float otherViewportLinewidth = 0.001f;
+float overlayOpacity = 0.75f;
 
 vec3 center = vec3(0.5, 0.5, 0.5);
 
@@ -43,19 +44,24 @@ void main()
 	float dotProduct1 = calculateViewingAngleForOtherViewport(samplingPosition, otherForward1, otherZ1);
 	float dotProduct2 = calculateViewingAngleForOtherViewport(samplingPosition, otherForward2, otherZ2);
 
+	vec4 sampled = texture(textureInput, TexCoords);
+	float temp = max(sampled.r, minWindow);
+	float modifiedValue = min(temp, maxWindow);
+	float interpolation = (modifiedValue - minWindow) / (maxWindow - minWindow);
+	vec3 finalColor = vec3(interpolation, interpolation, interpolation);
+
 	if (TexCoords.x < borderWidth || TexCoords.x > (1 - borderWidth) || TexCoords.y < borderWidth || TexCoords.y > (1 - borderWidth)) {
-		FragColor = vec4(viewportColor, 1.0);
+		vec3 borderColor = mix(finalColor, viewportColor, overlayOpacity);
+		FragColor = vec4(borderColor, 1.0);
 	}
 	else if (abs(dotProduct1) < otherViewportLinewidth) {
-		FragColor = vec4(otherColor1, 1.0);
+		vec3 lineColor1 = mix(finalColor, otherColor1, overlayOpacity);
+		FragColor = vec4(lineColor1, 1.0);
 	}
 	else if (abs(dotProduct2) < otherViewportLinewidth) {
-		FragColor = vec4(otherColor2, 1.0);
+		vec3 lineColor2 = mix(finalColor, otherColor2, overlayOpacity);
+		FragColor = vec4(lineColor2, 1.0);
 	} else {
-		vec4 sampled = texture(textureInput, TexCoords);
-		float temp = max(sampled.r, minWindow);
-		float modifiedValue = min(temp, maxWindow);
-		float interpolation = (modifiedValue - minWindow) / (maxWindow - minWindow);
-		FragColor = vec4(interpolation, interpolation, interpolation, 1.0);
+		FragColor = vec4(finalColor, 1.0);
 	}
 }

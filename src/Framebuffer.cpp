@@ -1,12 +1,15 @@
 #include "Framebuffer.h"
 
 #include "Renderer.h"
+#include "OpenGLMutex.h"
 
 #include <iostream>
 
 Framebuffer::Framebuffer(const uint32_t width, const uint32_t height)
     : IFramebuffer()
 {
+    OpenGLLockGuard lock;
+
     m_Width = width;
     m_Height = height;
     glGenFramebuffers(1, &m_FrameBuffer);
@@ -39,6 +42,8 @@ Framebuffer::Framebuffer(const uint32_t width, const uint32_t height)
 FloatFramebuffer::FloatFramebuffer(const uint32_t width, const uint32_t height)
     : IFramebuffer()
 {
+    OpenGLLockGuard lock;
+
     m_Width = width;
     m_Height = height;
     glGenFramebuffers(1, &m_FrameBuffer);
@@ -71,6 +76,8 @@ FloatFramebuffer::FloatFramebuffer(const uint32_t width, const uint32_t height)
 ViewportFramebuffer::ViewportFramebuffer(const uint32_t width, const uint32_t height)
     : IFramebuffer()
 {
+    OpenGLLockGuard lock;
+
     m_Width = width;
     m_Height = height;
     glGenFramebuffers(1, &m_FrameBuffer);

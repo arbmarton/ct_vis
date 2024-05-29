@@ -77,25 +77,11 @@ int main(int argc, char** argv)
     glfwSetMouseButtonCallback(
         context, [](GLFWwindow* /*window*/, int button, int action, int mods) { Renderer::instance().onMouseButton(button, action, mods); });
 
-    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    auto imageSet = ImageLoader(folder, 12).load();
-    //const auto test = data::transformHUtoPixels(imageSet.m_HounsfieldData, -2000, 500);
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
-    //Renderer::instance().set3DTexture(utils::texture3DFromData(test));
-    Renderer::instance().set3DTexture(utils::texture3DFromData(imageSet.m_HounsfieldData));
-    Renderer::instance().setImageSet(&imageSet);
-    std::chrono::steady_clock::time_point asd = std::chrono::steady_clock::now();
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(asd - end).count() << "[ms]" << std::endl;
+    Renderer::instance().setImageSet(ImageLoader(folder, 12).load());
 
     ShaderBank::instance().getValue(ShaderType::CtViewport);
     ShaderBank::instance().getValue(ShaderType::CtViewportPostprocess);
     ShaderBank::instance().getValue(ShaderType::MainViewport);
-
-    std::chrono::steady_clock::time_point qqqq = std::chrono::steady_clock::now();
-
-    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(qqqq - asd).count() << "[ms]" << std::endl;
-
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     while (!glfwWindowShouldClose(context))

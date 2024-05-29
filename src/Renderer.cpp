@@ -28,6 +28,8 @@ Renderer& Renderer::instance()
 
 Renderer::Renderer()
 {
+    OpenGLLockGuard lock;
+
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -68,6 +70,8 @@ void Renderer::draw()
     if (m_NeedUpload) {
         uploadNew3DTexture();
     }
+
+    OpenGLLockGuard lock;
 
     const auto renderViewport = [this](const Viewport& viewport, const Viewport& other1, const Viewport& other2) {
         const auto& dataframebuffer = viewport.getDataFrameBuffer();
@@ -190,6 +194,12 @@ void Renderer::onMouseButton(int button, int action, int /*mods*/)
     }
 }
 
+void Renderer::setImageSet(std::unique_ptr<ImageSet> imgset)
+{
+    m_ImageSet = std::move(imgset);
+    m_3DTexture = utils::texture3DFromData(m_ImageSet->m_HounsfieldData);
+}
+
 std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) const
 {
     const auto viewport = getViewportFromMousePosition();
@@ -303,6 +313,20 @@ void Renderer::drawImGui()
                 std::thread thread([this] {
                     m_ImageSet->applyPostprocessing(m_FFTThreshold);
 
+                    OpenGLLockGuard lock;
+
+                    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
+                    glBufferData(GL_PIXEL_UNPACK_BUFFER, m_ImageSet->getByteSize(), nullptr, GL_STREAM_DRAW);
+
+                    void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+                    if (ptr) {
+                        // Copy the texture data to the PBO
+                        memcpy(ptr, m_ImageSet->getPostProcessedData().data(), m_ImageSet->getByteSize());
+                        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+                    }
+
+                    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
                     m_NeedUpload = true;
 
                     m_IsSliderDisabled = false;
@@ -312,7 +336,7 @@ void Renderer::drawImGui()
         }
 
         // TODO: use viewport coordinates instead of window coordinates
-        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", "
+        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", Hounsfield value: "
                      + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
                         .c_str());
 
@@ -325,18 +349,28 @@ void Renderer::drawImGui()
 
 void Renderer::uploadNew3DTexture()
 {
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, m_ImageSet->getByteSize(), nullptr, GL_STREAM_DRAW);
+    OpenGLLockGuard lock;
 
-    void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-    if (ptr) {
-        // Copy the texture data to the PBO
-        memcpy(ptr, m_ImageSet->getPostProcessedData().data(), m_ImageSet->getByteSize());
-        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    }
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
+    //glBufferData(GL_PIXEL_UNPACK_BUFFER, m_ImageSet->getByteSize(), nullptr, GL_STREAM_DRAW);
+    //
+    //void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    //if (ptr) {
+    //    // Copy the texture data to the PBO
+    //    memcpy(ptr, m_ImageSet->getPostProcessedData().data(), m_ImageSet->getByteSize());
+    //    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    //}
+
+
+    //const auto test = data::transformHUtoPixels(imageSet.m_HounsfieldData, -2000, 500);
+
 
     glBindTexture(GL_TEXTURE_3D, m_3DTexture);
     glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->m_DicomImages.size()), GL_RED, GL_FLOAT, 0);
+
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 

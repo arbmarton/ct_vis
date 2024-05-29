@@ -13,6 +13,7 @@
 #pragma warning(pop)
 
 #include "BasicDraw.h"
+#include "OpenGLMutex.h"
 
 #pragma warning(push)
 #pragma warning(disable : 4127)
@@ -85,6 +86,8 @@ std::vector<float> normalizeVector(const std::vector<float>& vec)
 
 GLuint textureFromDicomImage(DicomImage* img)
 {
+    OpenGLLockGuard lock;
+
     const uint8_t* data = static_cast<const uint8_t*>(img->getOutputData(8));
 
     GLuint textureID;
@@ -111,6 +114,8 @@ GLuint textureFromDicomImage(DicomImage* img)
 
 GLuint generateDataTexture(const uint32_t width, const uint32_t height)
 {
+    OpenGLLockGuard lock;
+
     GLuint textureID;
     glGenTextures(1, &textureID);
 
@@ -128,6 +133,8 @@ GLuint generateDataTexture(const uint32_t width, const uint32_t height)
 
 GLuint texture3DFromData(const std::vector<uint8_t>& vec)
 {
+    OpenGLLockGuard lock;
+
     const uint8_t* data = vec.data();
 
     GLuint textureID;
@@ -155,6 +162,8 @@ GLuint texture3DFromData(const std::vector<uint8_t>& vec)
 
 GLuint texture3DFromData(const std::vector<float>& vec)
 {
+    OpenGLLockGuard lock;
+
     const float* data = vec.data();
 
     GLuint textureID;
@@ -182,6 +191,8 @@ GLuint texture3DFromData(const std::vector<float>& vec)
 
 std::vector<float> getTextureData(const GLuint id, const uint32_t width, const uint32_t height)
 {
+    OpenGLLockGuard lock;
+
     glBindTexture(GL_TEXTURE_2D, id);
 
     std::vector<float> ret;
@@ -195,6 +206,8 @@ std::vector<float> getTextureData(const GLuint id, const uint32_t width, const u
 
 void updateTextureData(const GLuint id, const uint32_t width, const uint32_t height, const std::vector<float>& data)
 {
+    OpenGLLockGuard lock;
+
     glBindTexture(GL_TEXTURE_2D, id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED, GL_FLOAT, data.data());
     glBindTexture(GL_TEXTURE_2D, 0);

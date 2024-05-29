@@ -9,6 +9,7 @@
 #include <limits>
 #include <optional>
 #include <vector>
+#include <memory>
 
 class Renderer
 {
@@ -29,14 +30,7 @@ public:
     void onMouseMove(const float xPos, const float yPos);
     void onMouseButton(int button, int action, int mods);
 
-    void set3DTexture(const GLuint texture)
-    {
-        m_3DTexture = texture;
-    }
-    void setImageSet(ImageSet* imgset)
-    {
-        m_ImageSet = imgset;
-    }
+    void setImageSet(std::unique_ptr<ImageSet> imgset);
 
 private:
     Renderer();
@@ -79,7 +73,7 @@ private:
         0.5f,
         glm::vec3(0, 0, 1));
 
-    ImageSet* m_ImageSet = nullptr;
+    std::unique_ptr<ImageSet> m_ImageSet;
     bool m_NeedUpload = false;
 
     float m_LastMouseX = RENDER_WIDTH / 2;

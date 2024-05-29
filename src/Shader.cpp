@@ -2,6 +2,7 @@
 
 #include "Utilities.h"
 #include "OpenGL.h"
+#include "OpenGLMutex.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -40,6 +41,8 @@ Shader::~Shader() = default;
 
 void Shader::loadInternal(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath, const std::filesystem::path& geometryPath)
 {
+    OpenGLLockGuard lock;
+
     std::string vertexCode;
     std::string fragmentCode;
     std::string geometryCode;

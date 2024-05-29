@@ -10,6 +10,11 @@
 
 std::mutex mutex;
 
+ImageSet::~ImageSet()
+{
+
+}
+
 const std::vector<float>& ImageSet::getPostProcessedData() const
 {
     std::lock_guard<std::mutex> lock(mutex);

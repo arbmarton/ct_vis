@@ -14,9 +14,9 @@ ImageLoader::ImageLoader(const std::filesystem::path& folderPath, const uint32_t
 {
 }
 
-ImageSet ImageLoader::load() const
+std::unique_ptr<ImageSet> ImageLoader::load() const
 {
-    ImageSet ret;
+    auto ret = std::make_unique<ImageSet>();
 
     std::vector<std::filesystem::path> dicomDirectoryEntries;
     for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(m_Folder))
@@ -32,10 +32,10 @@ ImageSet ImageLoader::load() const
     // Force alphebetical order
     std::sort(dicomDirectoryEntries.begin(), dicomDirectoryEntries.end());
 
-    ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
-    ret.m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
-    ret.getPostProcessedData().resize(512 * 512 * dicomDirectoryEntries.size());
-    ret.m_DicomImages.resize(dicomDirectoryEntries.size());
+    ret->m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
+    ret->m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
+    ret->getPostProcessedData().resize(512 * 512 * dicomDirectoryEntries.size());
+    ret->m_DicomImages.resize(dicomDirectoryEntries.size());
 
     const auto threadLambda = [&](const uint32_t threadID) {
         for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += m_MaxThreads)
@@ -101,17 +101,17 @@ ImageSet ImageLoader::load() const
                 floatData[i] = float(castedData[i]);
             }
 
-            memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height * sizeof(float));
+            memcpy(&ret->m_HounsfieldData[width * height * iter], floatData.data(), width * height * sizeof(float));
 
             const auto postProcessed = utils::applyOpenCVLowPassFilter2D(floatData.data(), width, height, 1.0f);
-            memcpy(&ret.getPostProcessedData()[width * height * iter], postProcessed.data(), width * height * sizeof(float));
+            memcpy(&ret->getPostProcessedData()[width * height * iter], postProcessed.data(), width * height * sizeof(float));
 
             img->setMinMaxWindow();
             const uint8_t* pixelData = static_cast<const uint8_t*>(img->getOutputData(8));
 
-            memcpy(&ret.m_PixelData[width * height * iter], pixelData, width * height * sizeof(uint8_t));
+            memcpy(&ret->m_PixelData[width * height * iter], pixelData, width * height * sizeof(uint8_t));
 
-            ret.m_DicomImages[iter] = std::move(img);
+            ret->m_DicomImages[iter] = std::move(img);
         }
     };
 
