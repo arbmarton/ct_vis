@@ -31,7 +31,8 @@ std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3
 
 int main(int argc, char** argv)
 {
-    if (argc > 1) {
+    if (argc > 1)
+    {
         folder = argv[1];
     }
 
@@ -73,7 +74,8 @@ int main(int argc, char** argv)
     glfwSetFramebufferSizeCallback(context, [](GLFWwindow* /*window*/, const int width, const int height) { glViewport(0, 0, width, height); });
     glfwSetCursorPosCallback(context, [](GLFWwindow* /*window*/, double x, double y) { Renderer::instance().onMouseMove(float(x), float(y)); });
     glfwSetScrollCallback(context, [](GLFWwindow* /*window*/, double /*x*/, double y) { Renderer::instance().onScroll(float(y)); });
-    glfwSetMouseButtonCallback(context, [](GLFWwindow* /*window*/, int /*button*/, int /*action*/, int /*mods*/) {});
+    glfwSetMouseButtonCallback(
+        context, [](GLFWwindow* /*window*/, int button, int action, int mods) { Renderer::instance().onMouseButton(button, action, mods); });
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     auto imageSet = ImageLoader(folder, 12).load();
@@ -104,7 +106,7 @@ int main(int argc, char** argv)
 
         (void)millisecs;
 
-        //std::cout << "Time: " + std::to_string(millisecs) + ", FPS: " + std::to_string(1 / (millisecs / 1000)) << "\n";
+        std::cout << "Time: " + std::to_string(millisecs) + ", FPS: " + std::to_string(1 / (millisecs / 1000)) << "\n";
 
         Renderer::instance().draw();
 

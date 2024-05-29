@@ -60,7 +60,7 @@ GLuint texture3DFromData(const std::vector<float>& vec);
 std::vector<float> getTextureData(const GLuint id, const uint32_t width, const uint32_t height);
 void updateTextureData(const GLuint id, const uint32_t width, const uint32_t height, const std::vector<float>& data);
 
-std::vector<float> applyOpenCVLowPassFilter2D(const std::vector<float>& input, const uint32_t width, const uint32_t height, const float cutoff);
+std::vector<float> applyOpenCVLowPassFilter2D(float* input, const uint32_t width, const uint32_t height, const float cutoff);
 
 std::filesystem::path getTempFolderPath();
 std::filesystem::path getShaderFolderPath();

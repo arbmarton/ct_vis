@@ -27,6 +27,7 @@ public:
     void draw();
     void onScroll(const float yOffset);
     void onMouseMove(const float xPos, const float yPos);
+    void onMouseButton(int button, int action, int mods);
 
     void set3DTexture(const GLuint texture)
     {
@@ -44,6 +45,7 @@ private:
     Viewport* getViewportFromMousePosition();
     const Viewport* getViewportFromMousePosition() const;
     void drawImGui();
+    void uploadNew3DTexture();
 
     constexpr static float m_QuadVertices[] = {
         // positions + texcoords
@@ -51,6 +53,9 @@ private:
     };
     GLuint m_QuadVAO;
     GLuint m_QuadVBO;
+    GLuint m_PBO;
+#undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
+    GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
 
     Viewport m_Viewport1 = Viewport(
         glm::ivec2(512, 512),
@@ -75,12 +80,13 @@ private:
         glm::vec3(0, 0, 1));
 
     ImageSet* m_ImageSet = nullptr;
-#undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
-    GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
-    GLuint m_PostprocessOutput = std::numeric_limits<GLuint>::max();
+    bool m_NeedUpload = false;
 
     float m_LastMouseX = RENDER_WIDTH / 2;
     float m_LastMouseY = RENDER_HEIGHT / 2;
+    bool m_MousePressed = false;
+    bool m_IsFFTSliderActive = false;
+    bool m_IsSliderDisabled = false;
 
     float m_FFTThreshold = 1.0f;
     int32_t m_HounsfieldWindowLow = -1000;

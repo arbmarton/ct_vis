@@ -17,10 +17,6 @@ ImageLoader::ImageLoader(const std::filesystem::path& folderPath, const uint32_t
 ImageSet ImageLoader::load() const
 {
     ImageSet ret;
-    std::mutex dicomImageMutex;
-    std::mutex pixelDataMutex;
-    std::mutex hounsfieldMutex;
-    std::mutex postprocessMutex;
 
     std::vector<std::filesystem::path> dicomDirectoryEntries;
     for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(m_Folder))
@@ -38,7 +34,7 @@ ImageSet ImageLoader::load() const
 
     ret.m_PixelData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret.m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
-    ret.m_PostprocessedData.resize(512 * 512 * dicomDirectoryEntries.size());
+    ret.getPostProcessedData().resize(512 * 512 * dicomDirectoryEntries.size());
     ret.m_DicomImages.resize(dicomDirectoryEntries.size());
 
     const auto threadLambda = [&](const uint32_t threadID) {
@@ -105,30 +101,17 @@ ImageSet ImageLoader::load() const
                 floatData[i] = float(castedData[i]);
             }
 
-            {
-                // TODO: it should be possible to eliminate floatData
-                std::lock_guard<std::mutex> guard(hounsfieldMutex);
-                memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height * sizeof(float));
-            }
+            memcpy(&ret.m_HounsfieldData[width * height * iter], floatData.data(), width * height * sizeof(float));
 
-            {
-                const auto postProcessed = utils::applyOpenCVLowPassFilter2D(floatData, width, height, 1.0f);
-                std::lock_guard<std::mutex> guard(postprocessMutex);
-                memcpy(&ret.m_PostprocessedData[width * height * iter], postProcessed.data(), width * height * sizeof(float));
-            }
+            const auto postProcessed = utils::applyOpenCVLowPassFilter2D(floatData.data(), width, height, 1.0f);
+            memcpy(&ret.getPostProcessedData()[width * height * iter], postProcessed.data(), width * height * sizeof(float));
 
             img->setMinMaxWindow();
             const uint8_t* pixelData = static_cast<const uint8_t*>(img->getOutputData(8));
 
-            {
-                std::lock_guard<std::mutex> guard(pixelDataMutex);
-                memcpy(&ret.m_PixelData[width * height * iter], pixelData, width * height * sizeof(uint8_t));
-            }
+            memcpy(&ret.m_PixelData[width * height * iter], pixelData, width * height * sizeof(uint8_t));
 
-            {
-                std::lock_guard<std::mutex> guard(dicomImageMutex);
-                ret.m_DicomImages[iter] = std::move(img);
-            }
+            ret.m_DicomImages[iter] = std::move(img);
         }
     };
 

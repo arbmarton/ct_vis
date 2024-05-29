@@ -18,7 +18,8 @@ uniform vec3 otherForward2;
 uniform float otherZ1;
 uniform float otherZ2;
 
-float borderWidth = 0.01f;
+float borderWidth = 0.005f;
+float otherViewportLinewidth = 0.001f;
 
 vec3 center = vec3(0.5, 0.5, 0.5);
 
@@ -45,10 +46,10 @@ void main()
 	if (TexCoords.x < borderWidth || TexCoords.x > (1 - borderWidth) || TexCoords.y < borderWidth || TexCoords.y > (1 - borderWidth)) {
 		FragColor = vec4(viewportColor, 1.0);
 	}
-	else if (abs(dotProduct1) < 0.001) {
+	else if (abs(dotProduct1) < otherViewportLinewidth) {
 		FragColor = vec4(otherColor1, 1.0);
 	}
-	else if (abs(dotProduct2) < 0.001) {
+	else if (abs(dotProduct2) < otherViewportLinewidth) {
 		FragColor = vec4(otherColor2, 1.0);
 	} else {
 		vec4 sampled = texture(textureInput, TexCoords);

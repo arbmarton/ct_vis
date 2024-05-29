@@ -200,10 +200,10 @@ void updateTextureData(const GLuint id, const uint32_t width, const uint32_t hei
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-std::vector<float> applyOpenCVLowPassFilter2D(const std::vector<float>& input, const uint32_t width, const uint32_t height, const float cutoff)
+std::vector<float> applyOpenCVLowPassFilter2D(float* input, const uint32_t width, const uint32_t height, const float cutoff)
 {
     cv::Mat floatMat(height, width, CV_32F);
-    memcpy(floatMat.data, input.data(), input.size() * sizeof(float));
+    memcpy(floatMat.data, input, width * height * sizeof(float));
 
     const int m = cv::getOptimalDFTSize(height);
     const int n = cv::getOptimalDFTSize(width);  // on the border add zero values

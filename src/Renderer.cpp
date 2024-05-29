@@ -7,6 +7,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <GLFW/glfw3.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gtx/string_cast.hpp"
@@ -42,7 +43,7 @@ Renderer::Renderer()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    m_PostprocessOutput = utils::generateDataTexture(512, 512);
+    glGenBuffers(1, &m_PBO);
 
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
@@ -64,6 +65,10 @@ void Renderer::draw()
         throw 0;
     }
 
+    if (m_NeedUpload) {
+        uploadNew3DTexture();
+    }
+
     const auto renderViewport = [this](const Viewport& viewport, const Viewport& other1, const Viewport& other2) {
         const auto& dataframebuffer = viewport.getDataFrameBuffer();
         glViewport(0, 0, dataframebuffer.m_Width, dataframebuffer.m_Height);
@@ -81,17 +86,6 @@ void Renderer::draw()
 
         glBindVertexArray(m_QuadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        //std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        //const auto v = utils::getTextureData(dataframebuffer.m_TexColorBuffer, dataframebuffer.m_Width, //dataframebuffer.m_Height);
-        //
-        //const auto transformed = utils::applyOpenCVLowPassFilter2D(v, dataframebuffer.m_Width, //dataframebuffer.m_Height, m_FFTThreshold);
-        //std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        //std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - //begin).count() << "[ms]" << std::endl;
-        //
-        //
-        //utils::updateTextureData(m_PostprocessOutput, dataframebuffer.m_Width, dataframebuffer.m_Height, transformed);
-
 
         const auto& colorFramebuffer = viewport.getColorFrameBuffer();
         glViewport(0, 0, colorFramebuffer.m_Width, colorFramebuffer.m_Height);
@@ -181,6 +175,21 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
     m_LastHoveredValue = samplePixel(xPos, yPos);
 }
 
+void Renderer::onMouseButton(int button, int action, int /*mods*/)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        if (action == GLFW_PRESS)
+        {
+            m_MousePressed = true;
+        }
+        else if (action == GLFW_RELEASE)
+        {
+            m_MousePressed = false;
+        }
+    }
+}
+
 std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) const
 {
     const auto viewport = getViewportFromMousePosition();
@@ -188,36 +197,24 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
     {
         return {};
     }
-    //const auto& framebuffer = viewport->getDataFrameBuffer();
 
     float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
     float y = ((yPos - viewport->getWindowOffset().y) / viewport->getPixelHeight()) * viewport->getRenderHeight();
 
-    //y = viewport->getRenderHeight() - y;
-
     x /= viewport->getRenderWidth();
     y /= viewport->getRenderHeight();
 
-    std::cout << "input xpos: " << xPos << ", transformed: " << x << "\n";
-    std::cout << "input ypos: " << yPos << ", transformed: " << y << "\n";
+    //std::cout << "input xpos: " << xPos << ", transformed: " << x << "\n";
+    //std::cout << "input ypos: " << yPos << ", transformed: " << y << "\n";
 
-    //glBindFramebuffer(GL_FRAMEBUFFER, framebuffer.m_FrameBuffer);
-    //glReadBuffer(GL_COLOR_ATTACHMENT0);
-    //float value;
-    //glReadPixels(uint32_t(x), uint32_t(y), 1, 1, GL_RED, GL_FLOAT, &value);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //return { value };
     const auto forw = viewport->getForward();
     glm::vec3 center = glm::vec3(0.5, 0.5, 0.5);
     glm::vec3 right = glm::normalize(glm::cross(viewport->getForward(), glm::vec3(0.0, 1.0, 0.0)));
     glm::vec3 up = glm::normalize(glm::cross(right, viewport->getForward()));
-    glm::vec3 samplingPosition = center +
-        right * (x * 2.0f - 1.0f) * 0.5f +
-        up * ((y) * 2.0f - 1.0f) * 0.5f +
-        viewport->getForward() * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
+    glm::vec3 samplingPosition =
+        center + right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + viewport->getForward() * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
 
-    std::cout << glm::to_string(samplingPosition) << "\n";
+    //std::cout << glm::to_string(samplingPosition) << "\n";
     return m_ImageSet->sampleHounsfieldData(samplingPosition);
 }
 
@@ -278,7 +275,41 @@ void Renderer::drawImGui()
         ImGui::SetWindowFontScale(scaling);
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
 
+        if (m_IsSliderDisabled)
+        {
+            ImGui::BeginDisabled();
+        }
         ImGui::DragFloat("FFT", &m_FFTThreshold, 0.001f, 0.1f, 1.0f);
+        if (m_IsSliderDisabled)
+        {
+            ImGui::EndDisabled();
+        }
+        if (ImGui::IsItemActive())
+        {
+            m_IsFFTSliderActive = true;
+        }
+        else
+        {
+            if (m_IsFFTSliderActive)
+            {
+                m_IsFFTSliderActive = false;
+                m_IsSliderDisabled = true;
+
+                if (!m_MousePressed)
+                {
+                    std::cout << "Slider adjustment ended with value: " << m_FFTThreshold << std::endl;
+                }
+                
+                std::thread thread([this] {
+                    m_ImageSet->applyPostprocessing(m_FFTThreshold);
+
+                    m_NeedUpload = true;
+
+                    m_IsSliderDisabled = false;
+                });
+                thread.detach();
+            }
+        }
 
         // TODO: use viewport coordinates instead of window coordinates
         ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY)) + ", "
@@ -290,4 +321,24 @@ void Renderer::drawImGui()
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Renderer::uploadNew3DTexture()
+{
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, m_ImageSet->getByteSize(), nullptr, GL_STREAM_DRAW);
+
+    void* ptr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    if (ptr) {
+        // Copy the texture data to the PBO
+        memcpy(ptr, m_ImageSet->getPostProcessedData().data(), m_ImageSet->getByteSize());
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    }
+
+    glBindTexture(GL_TEXTURE_3D, m_3DTexture);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->m_DicomImages.size()), GL_RED, GL_FLOAT, 0);
+
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    m_NeedUpload = false;
 }
