@@ -233,6 +233,7 @@ std::vector<float> applyOpenCVLowPassFilter2D(float* input, const uint32_t width
     const uint32_t cy = complexI.rows / 2;
 
     cv::circle(mask, cv::Point(cx, cy), static_cast<int>(cx * sqrt(2.0) * cutoff), cv::Scalar(1, 1), -1);
+    cv::GaussianBlur(mask, mask, cv::Size(31, 31), 10, 10);
 
     cv::split(complexI, planes);  // planes[0] = Re(DFT(I), planes[1] = Im(DFT(I))
     fftShift(planes[0]);
