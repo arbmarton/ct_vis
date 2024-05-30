@@ -384,4 +384,32 @@ constexpr int stoi(const char* str)
 {
     return stoi_impl(str);
 }
+
+// http://disq.us/p/2nnb6fw
+std::vector<float> createGaussianBlurWeights(const size_t kernel_size, const float std_dev)
+{
+    const auto gaussian = [](const float x, const float mean, const float stddev) {
+        const float a = (x - mean) / stddev;
+        return std::expf(-0.5f * a * a);
+    };
+
+    std::vector<float> gaussian_blur_weights(32, 0.0f);
+    for (size_t i = 0; i < (kernel_size + 1) / 2; ++i)
+    {
+        gaussian_blur_weights[i] = gaussian_blur_weights[kernel_size - 1 - i] = gaussian(float(i), (kernel_size - 1) / 2.0f, std_dev);
+    }
+
+    float weight_sum = 0.0;
+    for (const auto weight : gaussian_blur_weights)
+    {
+        weight_sum += weight;
+    }
+
+    for (size_t i = 0; i < (kernel_size + 1) / 2; ++i)
+    {
+        gaussian_blur_weights[i] = gaussian_blur_weights[kernel_size - 1 - i] = gaussian_blur_weights[i] / weight_sum;
+    }
+
+    return gaussian_blur_weights;
+}
 }  // namespace utils

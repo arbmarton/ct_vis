@@ -205,7 +205,7 @@ void Shader::setFloat(const std::string& name, const float value) const
     glUniform1f(glGetUniformLocation(m_ID, name.c_str()), value);
 }
 
-void Shader::setFloatArray(const std::string& name, const size_t count, float* value) const
+void Shader::setFloatArray(const std::string& name, const size_t count, const float* value) const
 {
     glUniform1fv(glGetUniformLocation(m_ID, name.c_str()), int(count), value);
 }
@@ -270,4 +270,9 @@ void MainViewportShader::setValues() const
     setInt("viewport1", 0);
     setInt("viewport2", 1);
     setInt("viewport3", 2);
+}
+
+void GaussianBlurShader::setValues() const
+{
+    setInt("screenTexture", 0);
 }

@@ -48,6 +48,8 @@ Renderer::Renderer()
 
     glGenBuffers(1, &m_PBO);
 
+    m_NextPostProcessFrameBuffer = &m_PostProcessFrameBuffer1;
+
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(Globals::instance().getOpenGLContext(), true);
@@ -75,7 +77,20 @@ void Renderer::draw()
 
     OpenGLLockGuard lock;
 
-    const auto renderViewport = [this](const Viewport& viewport, const Viewport& other1, const Viewport& other2) {
+    const auto calculateKernelSize = [this]() {
+        if (m_ApplyBlur)
+        {
+            return m_BlurKernelSize + (1 - m_BlurKernelSize % 2);
+        }
+        else
+        {
+            return 1;
+        }
+    };
+
+    const std::vector<float> gaussWeights = utils::createGaussianBlurWeights(calculateKernelSize(), m_BlurSigma);
+
+    const auto renderViewport = [this, gaussWeights, calculateKernelSize](const Viewport& viewport, const Viewport& other1, const Viewport& other2) {
         const auto& dataframebuffer = viewport.getDataFrameBuffer();
         glViewport(0, 0, dataframebuffer.m_Width, dataframebuffer.m_Height);
         glBindFramebuffer(GL_FRAMEBUFFER, dataframebuffer.m_FrameBuffer);
@@ -92,6 +107,38 @@ void Renderer::draw()
 
         glBindVertexArray(m_QuadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+        const auto& blurShader = ShaderBank::instance().getValue(ShaderType::GaussianBlur);
+        blurShader->use();
+        blurShader->setFloatArray("weights", 32, gaussWeights.data());
+        blurShader->setInt("size", calculateKernelSize());
+        bool horizontal = true;
+        bool firstRun = true;
+        for (int i = 0; i < 2; ++i)
+        {
+            blurShader->setBool("horizontal", horizontal);
+
+            glBindFramebuffer(GL_FRAMEBUFFER, m_NextPostProcessFrameBuffer->m_FrameBuffer);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glActiveTexture(GL_TEXTURE0);
+            if (firstRun)
+            {
+                glBindTexture(GL_TEXTURE_2D, dataframebuffer.m_TexColorBuffer);
+            }
+            else
+            {
+                glBindTexture(GL_TEXTURE_2D, m_LastPostProcessFrameBuffer->m_TexColorBuffer);
+            }
+
+            glBindVertexArray(m_QuadVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            swapPostProcessFrameBuffers();
+            horizontal = !horizontal;
+            firstRun = false;
+        }
 
         const auto& colorFramebuffer = viewport.getColorFrameBuffer();
         glViewport(0, 0, colorFramebuffer.m_Width, colorFramebuffer.m_Height);
@@ -114,7 +161,7 @@ void Renderer::draw()
         ctPostprocessShader->setFloat("otherZ2", other2.getZLevel());
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, dataframebuffer.m_TexColorBuffer);
+        glBindTexture(GL_TEXTURE_2D, m_LastPostProcessFrameBuffer->m_TexColorBuffer);
 
         glBindVertexArray(m_QuadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -281,7 +328,7 @@ void Renderer::drawImGui()
     {
         const ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
         ImGui::SetNextWindowPos({ RENDER_WIDTH / 2 + 50, RENDER_HEIGHT / 2 + 50 }, ImGuiCond_Always);
-        ImGui::SetNextWindowSize({ 400 * scaling, 100 * scaling }, ImGuiCond_Always);
+        ImGui::SetNextWindowSize({ 400 * scaling, 200 * scaling }, ImGuiCond_Always);
 
         ImGui::Begin("Settings", nullptr, flags);
         ImGui::SetWindowFontScale(scaling);
@@ -337,6 +384,12 @@ void Renderer::drawImGui()
                 thread.detach();
             }
         }
+        ImGui::Checkbox("Apply blur", &m_ApplyBlur);
+        if (m_ApplyBlur)
+        {
+            ImGui::DragInt("Blur Kernel Size", &m_BlurKernelSize, 0.01f, 1, 15);
+            ImGui::DragFloat("Blur Sigma", &m_BlurSigma, 0.01f, 0.01f, 15.0f);
+        }
 
         // TODO: use viewport coordinates instead of window coordinates
         ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY))
@@ -361,4 +414,18 @@ void Renderer::uploadNew3DTexture()
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     m_NeedUpload = false;
+}
+
+void Renderer::swapPostProcessFrameBuffers()
+{
+    if (m_NextPostProcessFrameBuffer == &m_PostProcessFrameBuffer1)
+    {
+        m_NextPostProcessFrameBuffer = &m_PostProcessFrameBuffer2;
+        m_LastPostProcessFrameBuffer = &m_PostProcessFrameBuffer1;
+    }
+    else
+    {
+        m_NextPostProcessFrameBuffer = &m_PostProcessFrameBuffer1;
+        m_LastPostProcessFrameBuffer = &m_PostProcessFrameBuffer2;
+    }
 }

@@ -83,4 +83,6 @@ std::string readFile(const std::string& filePath, const std::string& fileName);
 std::vector<std::string> getStringNumbers(const int max);
 constexpr int stoi(const char* str);
 
+std::vector<float> createGaussianBlurWeights(const size_t kernel_size, const float std_dev);
+
 }  // namespace utils

@@ -43,6 +43,7 @@ enum class ShaderType
     CtViewport,
     CtViewportPostprocess,
     MainViewport,
+    GaussianBlur,
     None
 };
 
@@ -58,6 +59,8 @@ inline std::string shaderTypeToString(const ShaderType type)
             return "main_viewport";
         case ShaderType::CtViewportPostprocess:
             return "ct_viewport_postprocess";
+        case ShaderType::GaussianBlur:
+            return "gaussian_blur";
     }
 
     throw std::exception();

@@ -50,7 +50,7 @@ public:
     void setBool(const std::string& name, const bool value) const;
     void setInt(const std::string& name, const int value) const;
     void setFloat(const std::string& name, const float value) const;
-    void setFloatArray(const std::string& name, const size_t count, float* value) const;
+    void setFloatArray(const std::string& name, const size_t count, const float* value) const;
     void setMat3(const std::string& name, const glm::mat3& mat) const;
     void setMat4(const std::string& name, const glm::mat4& mat) const;
     void setMat4Array(const std::string& name, const std::vector<glm::mat4>& vec) const;
@@ -122,6 +122,17 @@ class MainViewportShader : public Shader
 public:
     MainViewportShader()
         : Shader(ShaderType::MainViewport)
+    {
+    }
+
+    void setValues() const override;
+};
+
+class GaussianBlurShader : public Shader
+{
+public:
+    GaussianBlurShader()
+        : Shader(ShaderType::GaussianBlur)
     {
     }
 

@@ -91,6 +91,9 @@ inline std::unique_ptr<Shader>& Bank<ShaderType, std::unique_ptr<Shader>>::getVa
             case ShaderType::MainViewport:
                 addValue(key, std::make_unique<MainViewportShader>());
                 break;
+            case ShaderType::GaussianBlur:
+                addValue(key, std::make_unique<GaussianBlurShader>());
+                break;
             default:
                 throw std::exception();
         }

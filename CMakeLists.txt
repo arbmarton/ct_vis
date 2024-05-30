@@ -85,6 +85,8 @@ set(SHADER_FILES
 	shaders/ct_viewport.fs
 	shaders/ct_viewport_postprocess.vs
 	shaders/ct_viewport_postprocess.fs
+	shaders/gaussian_blur.vs
+	shaders/gaussian_blur.fs
 	shaders/main_viewport.vs
 	shaders/main_viewport.fs
 )

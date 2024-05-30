@@ -16,9 +16,9 @@ class Renderer
 public:
     static Renderer& instance();
     ~Renderer();
-    
+
 #ifdef __APPLE__
-    constexpr static bool vsync = false; // this is broken for some reason
+    constexpr static bool vsync = false;  // this is broken for some reason
 #else
     constexpr static bool vsync = false;
 #endif
@@ -46,6 +46,7 @@ private:
     const Viewport* getViewportFromMousePosition() const;
     void drawImGui();
     void uploadNew3DTexture();
+    void swapPostProcessFrameBuffers();
 
     constexpr static float m_QuadVertices[] = {
         // positions + texcoords
@@ -56,6 +57,11 @@ private:
     GLuint m_PBO;
 #undef max  // https://stackoverflow.com/questions/1394132/macro-and-member-function-conflict
     GLuint m_3DTexture = std::numeric_limits<GLuint>::max();
+
+    Framebuffer m_PostProcessFrameBuffer1 = Framebuffer(512, 512);
+    Framebuffer m_PostProcessFrameBuffer2 = Framebuffer(512, 512);
+    Framebuffer* m_NextPostProcessFrameBuffer{ nullptr };
+    Framebuffer* m_LastPostProcessFrameBuffer{ nullptr };
 
     Viewport m_Viewport1 = Viewport(
         glm::ivec2(512, 512),
@@ -91,6 +97,10 @@ private:
     float m_FFTThreshold = 1.0f;
     int32_t m_HounsfieldWindowLow = -1000;
     int32_t m_HounsfieldWindowHigh = 500;
+
+    bool m_ApplyBlur = true;
+    int32_t m_BlurKernelSize = 5;
+    float m_BlurSigma = 1.0f;
 
     std::optional<float> m_LastHoveredValue{ {} };
 };

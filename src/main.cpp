@@ -80,6 +80,7 @@ int main(int argc, char** argv)
     ShaderBank::instance().getValue(ShaderType::CtViewport);
     ShaderBank::instance().getValue(ShaderType::CtViewportPostprocess);
     ShaderBank::instance().getValue(ShaderType::MainViewport);
+    ShaderBank::instance().getValue(ShaderType::GaussianBlur);
 
     std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
     while (!glfwWindowShouldClose(context))
