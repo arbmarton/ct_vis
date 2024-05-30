@@ -12,5 +12,8 @@ OpenGLLockGuard::OpenGLLockGuard()
 
 OpenGLLockGuard::~OpenGLLockGuard()
 {
+#ifdef __APPLE__
+#else
     glfwMakeContextCurrent(nullptr);
+#endif
 }

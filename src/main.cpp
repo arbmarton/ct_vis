@@ -18,8 +18,6 @@
 #include <string>
 #include <limits>
 
-constexpr bool vsync = false;
-
 #ifdef __APPLE__
 std::string folder = "/Users/marci/dev/ct_vis/dataset/3.000000-Recon 2 VENOGRAM AP-05356/";
 #else
@@ -45,7 +43,7 @@ int main(int argc, char** argv)
 #endif
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    if constexpr (!vsync)
+    if constexpr (!Renderer::vsync)
     {
         glfwWindowHint(GLFW_DOUBLEBUFFER, GL_FALSE);
     }
@@ -96,7 +94,7 @@ int main(int argc, char** argv)
 
         Renderer::instance().draw();
 
-        if constexpr (!vsync)
+        if constexpr (!Renderer::vsync)
         {
             glfwSwapBuffers(context);
             glFlush();

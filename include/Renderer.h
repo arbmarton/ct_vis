@@ -16,6 +16,12 @@ class Renderer
 public:
     static Renderer& instance();
     ~Renderer();
+    
+#ifdef __APPLE__
+    constexpr static bool vsync = false; // this is broken for some reason
+#else
+    constexpr static bool vsync = false;
+#endif
 
 #ifdef __APPLE__
     constexpr static uint32_t RENDER_WIDTH = uint32_t(512 * 2);
