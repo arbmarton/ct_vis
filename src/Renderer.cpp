@@ -13,6 +13,7 @@
 #include "gtx/string_cast.hpp"
 
 #include <iostream>
+#include <thread>
 
 Renderer& Renderer::instance()
 {
