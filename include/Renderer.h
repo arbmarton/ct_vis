@@ -74,7 +74,7 @@ private:
         glm::ivec2(512, 512),
         glm::vec2(RENDER_WIDTH / 2, RENDER_HEIGHT / 2),
         glm::ivec2(RENDER_WIDTH / 2, 0),
-        glm::normalize(glm::vec3(0.0f, 1.0f, 1.0f)),
+        glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)),
         0.5f,
         glm::vec3(0, 1, 0));
     Viewport m_Viewport3 = Viewport(
@@ -84,6 +84,7 @@ private:
         glm::normalize(glm::vec3(0.0001f, 0.9999f, 0.0f)),
         0.5f,
         glm::vec3(0, 0, 1));
+    Viewport* m_CurrentViewport = nullptr;
 
     std::unique_ptr<ImageSet> m_ImageSet;
     bool m_NeedUpload = false;
@@ -98,7 +99,7 @@ private:
     int32_t m_HounsfieldWindowLow = -1000;
     int32_t m_HounsfieldWindowHigh = 500;
 
-    bool m_ApplyBlur = true;
+    bool m_ApplyBlur = false;
     int32_t m_BlurKernelSize = 5;
     float m_BlurSigma = 1.0f;
 

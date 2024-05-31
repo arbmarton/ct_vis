@@ -225,6 +225,7 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
     (void)xOffset;
     (void)yOffset;
 
+    m_CurrentViewport = getViewportFromMousePosition();
     m_LastHoveredValue = samplePixel(xPos, yPos);
 }
 
@@ -395,6 +396,12 @@ void Renderer::drawImGui()
         ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY))
                      + ", Hounsfield value: " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
                         .c_str());
+
+        if (m_CurrentViewport)
+        {
+            const auto str = std::string("Dir: ") + glm::to_string(m_CurrentViewport->getForward()) + ", Depth: " +  std::to_string(m_CurrentViewport->getZLevel()).substr(0, 4);
+            ImGui::Text(str.c_str());
+        }
 
         ImGui::End();
     }
