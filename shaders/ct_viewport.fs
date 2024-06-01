@@ -9,8 +9,9 @@ uniform float zLevel;
 uniform float fov;
 uniform vec3 forward;
 uniform vec3 upVector;
+uniform vec3 centerOffset;
 
-vec3 center = vec3(0.5, 0.5, 0.5);
+vec3 center = vec3(0.5, 0.5, 0.5) + centerOffset;
 
 void main()
 { 

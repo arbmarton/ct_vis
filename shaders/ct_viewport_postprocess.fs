@@ -12,6 +12,7 @@ uniform vec3 viewportColor;
 uniform float minWindow;
 uniform float maxWindow;
 uniform vec3 upVector;
+uniform vec3 centerOffset;
 
 uniform vec3 otherColor1;
 uniform vec3 otherColor2;
@@ -24,7 +25,7 @@ float borderWidth = 0.005f;
 float otherViewportLinewidth = 0.001f * fov;
 float overlayOpacity = 0.75f;
 
-vec3 center = vec3(0.5, 0.5, 0.5);
+vec3 center = vec3(0.5, 0.5, 0.5) + centerOffset;
 
 float calculateViewingAngleForOtherViewport(vec3 samplingPosition, vec3 otherForward, float otherZ)
 {

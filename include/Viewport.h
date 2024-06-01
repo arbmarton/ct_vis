@@ -69,6 +69,10 @@ public:
     {
         m_fov = fov;
     }
+    glm::vec3 getCenterOffset() const
+    {
+        return m_CenterOffset;
+    }
 
 private:
     const uint32_t m_RenderWidth;
@@ -80,6 +84,7 @@ private:
     const FloatFramebuffer m_Databuffer;
     const Framebuffer m_Colorbuffer;
 
+    glm::vec3 m_CenterOffset = glm::vec3(0.5, 0, 0);
     glm::vec3 m_Forward;
     float m_zLevel;
     float m_fov = 1.0f;

@@ -24,8 +24,12 @@ std::vector<float>& ImageSet::getPostProcessedData()
     return m_PostprocessedData;
 }
 
-float ImageSet::sampleHounsfieldData(const glm::vec3& v) const
+std::optional<float> ImageSet::sampleHounsfieldData(const glm::vec3& v) const
 {
+    if (glm::any(glm::lessThan(v, glm::vec3(0.0f))) || glm::any(glm::greaterThan(v, glm::vec3(1.0f)))) {
+        return {};
+    }
+
     const uint32_t width = m_Slices[0]->m_DicomImage.getWidth();
     const uint32_t height = m_Slices[0]->m_DicomImage.getHeight();
     const uint32_t depth = uint32_t(m_Slices.size() - 1);
@@ -37,12 +41,14 @@ float ImageSet::sampleHounsfieldData(const glm::vec3& v) const
     if (sampleIndex < 0)
     {
         std::cout << "out of range, low\n";
-        sampleIndex = 0;
+        //sampleIndex = 0;
+        return {};
     }
     if (sampleIndex >= m_HounsfieldData.size())
     {
         std::cout << "out of range, high, max value: " << m_HounsfieldData.size() << "\n";
-        sampleIndex = uint32_t(m_HounsfieldData.size()) - 1;
+        //sampleIndex = uint32_t(m_HounsfieldData.size()) - 1;
+        return {};
     }
 
     // TODO: linear interpolation between multiple samples

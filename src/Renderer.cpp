@@ -105,6 +105,7 @@ void Renderer::draw()
         ctViewportShader->setFloat("zLevel", viewport.getZLevel());
         ctViewportShader->setVec3("forward", viewport.getForward());
         ctViewportShader->setFloat("fov", viewport.getFov());
+        ctViewportShader->setVec3("centerOffset", viewport.getCenterOffset());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
@@ -164,6 +165,7 @@ void Renderer::draw()
         ctPostprocessShader->setFloat("otherZ1", other1.getZLevel());
         ctPostprocessShader->setFloat("otherZ2", other2.getZLevel());
         ctPostprocessShader->setFloat("fov", viewport.getFov());
+        ctPostprocessShader->setVec3("centerOffset", viewport.getCenterOffset());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_LastPostProcessFrameBuffer->m_TexColorBuffer);
@@ -277,7 +279,7 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
 
     const auto forw = viewport->getForward();
     const auto fov = viewport->getFov();
-    glm::vec3 center = glm::vec3(0.5, 0.5, 0.5);
+    glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset();
     glm::vec3 right = glm::normalize(glm::cross(viewport->getForward(), UP_DIR)) * fov;
     glm::vec3 up = glm::normalize(glm::cross(right, viewport->getForward())) * fov;
     glm::vec3 samplingPosition =

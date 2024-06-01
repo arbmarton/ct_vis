@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <memory>
+#include <optional>
 
 class ImageSet
 {
@@ -28,7 +29,7 @@ public:
     const std::vector<float>& getPostProcessedData() const;
     std::vector<float>& getPostProcessedData();
 
-    float sampleHounsfieldData(const glm::vec3& v) const;
+    std::optional<float> sampleHounsfieldData(const glm::vec3& v) const;
     void applyPostprocessing(const float fftParam);
     size_t getByteSize() const;
     uint32_t getWidth() const;
