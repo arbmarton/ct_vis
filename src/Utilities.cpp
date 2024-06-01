@@ -343,7 +343,8 @@ std::vector<std::string> splitString(std::string toSplit, const std::string& del
     size_t pos = 0;
     std::vector<std::string> seglist;
 
-    while ((pos = toSplit.find(delimiter)) != std::string::npos) {
+    while ((pos = toSplit.find(delimiter)) != std::string::npos)
+    {
         seglist.push_back(toSplit.substr(0, pos));
         toSplit.erase(0, pos + delimiter.length());
     }
@@ -367,10 +368,12 @@ std::string vec3ToString(const glm::vec3& v, const uint8_t decimals)
     const auto lambda = [&](const float input) {
         const auto str = std::to_string(input);
         const auto split = splitString(str, '.');
-        if (split[1].size() > decimals) {
+        if (split[1].size() > decimals)
+        {
             return split[0] + "." + split[1].substr(0, decimals);
         }
-        else {
+        else
+        {
             return str;
         }
     };

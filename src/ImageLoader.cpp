@@ -38,7 +38,7 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
 
     std::vector<std::unique_ptr<Slice>> tempDicomImages;
     tempDicomImages.resize(dicomDirectoryEntries.size());
-    const auto dicomCreationLambda = [&](const uint32_t threadID){
+    const auto dicomCreationLambda = [&](const uint32_t threadID) {
         for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += m_MaxThreads)
         {
             const auto& currentPath = dicomDirectoryEntries[iter];
@@ -54,7 +54,7 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             DcmFileFormat fileformat;
             fileformat.loadFile(currentPath.string().c_str());
             auto dataset = fileformat.getDataset();
-    
+
             Float64 pixelSpacing;
             OFString imagePositionPatient;
             Float64 sliceThickness;
@@ -67,12 +67,12 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             slice->m_PixelSpacig = float(pixelSpacing);
             slice->m_SliceThickness = float(sliceThickness);
             slice->m_SliceSpacing = float(spacingBetweenSlices);
-    
+
             const glm::vec3 imagePos = utils::vec3FromStrings(utils::splitString(imagePositionPatient.c_str(), "\\"));
             std::cout << "ZPOS: " << std::to_string(imagePos[2]) << "\n";
 
             slice->m_SlicePosition = imagePos;
-    
+
             tempDicomImages[iter] = std::move(slice);
         }
     };
@@ -90,8 +90,9 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             th.join();
         }
     }
-    
-    std::sort(tempDicomImages.begin(), tempDicomImages.end(), [](const auto& left, const auto& right) { return left->m_SlicePosition.z < right->m_SlicePosition.z; });
+
+    std::sort(
+        tempDicomImages.begin(), tempDicomImages.end(), [](const auto& left, const auto& right) { return left->m_SlicePosition.z < right->m_SlicePosition.z; });
 
     const auto dataLambda = [&](const uint32_t threadID) {
         for (uint32_t iter = threadID; iter < tempDicomImages.size(); iter += m_MaxThreads)

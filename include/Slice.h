@@ -12,21 +12,22 @@
 
 #include <string>
 
-struct Slice {
-	Slice(const std::string& str)
-		: m_DicomImage(DicomImage(str.c_str()))
-	{
-	}
-	Slice(const Slice& rhs) = delete;
-	Slice(Slice&& rhs) = delete;
-	Slice() = delete;
+struct Slice
+{
+    Slice(const std::string& str)
+        : m_DicomImage(DicomImage(str.c_str()))
+    {
+    }
+    Slice(const Slice& rhs) = delete;
+    Slice(Slice&& rhs) = delete;
+    Slice() = delete;
 
-	Slice& operator=(const Slice& rhs) = delete;
-	Slice& operator=(Slice&& rhs) = delete;
+    Slice& operator=(const Slice& rhs) = delete;
+    Slice& operator=(Slice&& rhs) = delete;
 
-	DicomImage m_DicomImage;
-	glm::vec3 m_SlicePosition;
-	float m_SliceThickness;
-	float m_SliceSpacing;
-	float m_PixelSpacig;
+    DicomImage m_DicomImage;
+    glm::vec3 m_SlicePosition;
+    float m_SliceThickness;
+    float m_SliceSpacing;
+    float m_PixelSpacig;
 };

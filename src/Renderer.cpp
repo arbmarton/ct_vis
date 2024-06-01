@@ -345,12 +345,14 @@ void Renderer::drawImGui()
 
         // TODO: use viewport coordinates instead of window coordinates
         ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY))
-            + ", Hounsfield value: " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
-            .c_str());
+                     + ", Hounsfield value: " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
+                        .c_str());
 
         if (m_CurrentViewport)
         {
-            const auto str = std::string("Dir: ") + utils::vec3ToString(m_CurrentViewport->getForward(), 2) + ", Depth: " + std::to_string(m_CurrentViewport->getZLevel()).substr(0, 4) + ", Fov: " + std::to_string(m_CurrentViewport->getFov()).substr(0, 4);
+            const auto str = std::string("Dir: ") + utils::vec3ToString(m_CurrentViewport->getForward(), 2)
+                             + ", Depth: " + std::to_string(m_CurrentViewport->getZLevel()).substr(0, 4)
+                             + ", Fov: " + std::to_string(m_CurrentViewport->getFov()).substr(0, 4);
             ImGui::Text(str.c_str());
         }
 
@@ -427,8 +429,7 @@ void Renderer::uploadNew3DTexture()
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
     glBindTexture(GL_TEXTURE_3D, m_3DTexture);
-    glTexSubImage3D(
-        GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->getSlices().size()), GL_RED, GL_FLOAT, 0);
+    glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->getSlices().size()), GL_RED, GL_FLOAT, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     m_NeedUpload = false;
