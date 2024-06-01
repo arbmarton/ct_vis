@@ -1,7 +1,3 @@
-#include "dcmtk/dcmdata/dctk.h"
-#include "dcmtk/config/osconfig.h"
-#include "dcmtk/dcmimgle/dcmimage.h"
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 

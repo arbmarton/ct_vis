@@ -1,7 +1,5 @@
 #include "ImageSet.h"
 
-#include "dcmtk/dcmimgle/dcmimage.h"
-
 #include "Utilities.h"
 
 #include <iostream>
@@ -28,9 +26,9 @@ std::vector<float>& ImageSet::getPostProcessedData()
 
 float ImageSet::sampleHounsfieldData(const glm::vec3& v) const
 {
-    const uint32_t width = m_DicomImages[0]->getWidth();
-    const uint32_t height = m_DicomImages[0]->getHeight();
-    const uint32_t depth = uint32_t(m_DicomImages.size() - 1);
+    const uint32_t width = m_Slices[0]->m_DicomImage.getWidth();
+    const uint32_t height = m_Slices[0]->m_DicomImage.getHeight();
+    const uint32_t depth = uint32_t(m_Slices.size() - 1);
 
     uint32_t sampleIndex = uint32_t(v.z * depth) * width * height + uint32_t(v.y * height) * width + uint32_t(v.x * width);
 
@@ -56,11 +54,11 @@ void ImageSet::applyPostprocessing(const float fftParam)
 {
     const auto maxThreads = std::max(std::thread::hardware_concurrency() - 1, 1u);
 
-    const auto width = m_DicomImages[0]->getWidth();
-    const auto height = m_DicomImages[0]->getHeight();
+    const auto width = m_Slices[0]->m_DicomImage.getWidth();
+    const auto height = m_Slices[0]->m_DicomImage.getHeight();
 
     const auto threadLambda = [&](const uint32_t threadID) {
-        for (uint32_t iter = threadID; iter < m_DicomImages.size(); iter += maxThreads)
+        for (uint32_t iter = threadID; iter < m_Slices.size(); iter += maxThreads)
         {
             const auto floatData = &m_HounsfieldData[width * height * iter];
             const auto postProcessed = utils::applyOpenCVLowPassFilter2D(floatData, width, height, fftParam);
@@ -86,15 +84,15 @@ void ImageSet::applyPostprocessing(const float fftParam)
 
 size_t ImageSet::getByteSize() const
 {
-    return getWidth() * getHeight() * m_DicomImages.size() * sizeof(float);
+    return getWidth() * getHeight() * m_Slices.size() * sizeof(float);
 }
 
 uint32_t ImageSet::getWidth() const
 {
-    return m_DicomImages[0]->getWidth();
+    return m_Slices[0]->m_DicomImage.getWidth();
 }
 
 uint32_t ImageSet::getHeight() const
 {
-    return m_DicomImages[0]->getHeight();
+    return m_Slices[0]->m_DicomImage.getHeight();
 }

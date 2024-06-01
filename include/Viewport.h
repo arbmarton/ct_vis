@@ -61,6 +61,14 @@ public:
     {
         return m_Color;
     }
+    float getFov() const
+    {
+        return m_fov;
+    }
+    void setFov(const float fov)
+    {
+        m_fov = fov;
+    }
 
 private:
     const uint32_t m_RenderWidth;
@@ -74,6 +82,7 @@ private:
 
     glm::vec3 m_Forward;
     float m_zLevel;
+    float m_fov = 1.0f;
 
     const glm::vec3 m_Color;
 };

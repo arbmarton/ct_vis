@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Slice.h"
+
 #pragma warning(push)
 #pragma warning(disable : 4201)
 #include <glm.hpp>
@@ -8,8 +10,6 @@
 #include <vector>
 #include <memory>
 
-class DicomImage;
-
 class ImageSet
 {
     friend class ImageLoader;
@@ -17,9 +17,9 @@ class ImageSet
 public:
     ~ImageSet();
 
-    const std::vector<std::unique_ptr<DicomImage>>& getDicomImages() const
+    const std::vector<std::unique_ptr<Slice>>& getSlices() const
     {
-        return m_DicomImages;
+        return m_Slices;
     }
     const std::vector<float>& getHounsfieldData() const
     {
@@ -35,7 +35,7 @@ public:
     uint32_t getHeight() const;
 
 private:
-    std::vector<std::unique_ptr<DicomImage>> m_DicomImages;
+    std::vector<std::unique_ptr<Slice>> m_Slices;
     std::vector<float> m_HounsfieldData;
     std::vector<float> m_PostprocessedData;
 };

@@ -13,7 +13,7 @@
 #include <vector>
 #include <cinttypes>
 
-class DicomImage;
+struct Slice;
 
 namespace utils {
 
@@ -53,7 +53,7 @@ std::pair<T, T> findMinimumAndMaximum(T* data, const size_t length)
 }
 
 std::vector<float> normalizeVector(const std::vector<float>& vec);
-GLuint textureFromDicomImage(DicomImage* img);
+GLuint textureFromDicomImage(Slice* img);
 GLuint generateDataTexture(const uint32_t width, const uint32_t height);
 GLuint texture3DFromData(const std::vector<uint8_t>& vec);
 GLuint texture3DFromData(const std::vector<float>& vec);
@@ -75,6 +75,8 @@ std::filesystem::path getSoundsFolderPath();
 std::filesystem::path getSoundPath(const std::string& soundName);
 
 std::vector<std::string> splitString(const std::string& toSplit, const char ch);
+std::vector<std::string> splitString(std::string toSplit, const std::string& delimiter);
+glm::vec3 vec3FromStrings(const std::vector<std::string>& v);
 std::string getFileNameFromPath(const std::filesystem::path& path);
 std::string getFileNameFromPath(const std::string& path);
 void writeToFile(const std::string& content, const std::string& filePath, const std::string& fileName);

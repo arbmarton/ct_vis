@@ -15,6 +15,9 @@
 #include <iostream>
 #include <thread>
 
+// https://theaisummer.com/medical-image-coordinates/
+const glm::vec3 Renderer::UP_DIR = glm::vec3(0, -1, 0);
+
 Renderer& Renderer::instance()
 {
     static Renderer* inst = nullptr;
@@ -101,6 +104,7 @@ void Renderer::draw()
         ctViewportShader->use();
         ctViewportShader->setFloat("zLevel", viewport.getZLevel());
         ctViewportShader->setVec3("forward", viewport.getForward());
+        ctViewportShader->setFloat("fov", viewport.getFov());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
@@ -159,6 +163,7 @@ void Renderer::draw()
         ctPostprocessShader->setVec3("otherForward2", other2.getForward());
         ctPostprocessShader->setFloat("otherZ1", other1.getZLevel());
         ctPostprocessShader->setFloat("otherZ2", other2.getZLevel());
+        ctPostprocessShader->setFloat("fov", viewport.getFov());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_LastPostProcessFrameBuffer->m_TexColorBuffer);
@@ -264,13 +269,17 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
     x /= viewport->getRenderWidth();
     y /= viewport->getRenderHeight();
 
+    // I think this is needed because the Texcoord y axis and the window y axis are opposites
+    y = 1 - y;
+
     //std::cout << "input xpos: " << xPos << ", transformed: " << x << "\n";
     //std::cout << "input ypos: " << yPos << ", transformed: " << y << "\n";
 
     const auto forw = viewport->getForward();
+    const auto fov = viewport->getFov();
     glm::vec3 center = glm::vec3(0.5, 0.5, 0.5);
-    glm::vec3 right = glm::normalize(glm::cross(viewport->getForward(), glm::vec3(0.0, 1.0, 0.0)));
-    glm::vec3 up = glm::normalize(glm::cross(right, viewport->getForward()));
+    glm::vec3 right = glm::normalize(glm::cross(viewport->getForward(), UP_DIR)) * fov;
+    glm::vec3 up = glm::normalize(glm::cross(right, viewport->getForward())) * fov;
     glm::vec3 samplingPosition =
         center + right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + viewport->getForward() * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
 
@@ -333,12 +342,25 @@ void Renderer::drawImGui()
 
         ImGui::Begin("Settings", nullptr, flags);
         ImGui::SetWindowFontScale(scaling);
+
+        // TODO: use viewport coordinates instead of window coordinates
+        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY))
+            + ", Hounsfield value: " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
+            .c_str());
+
+        if (m_CurrentViewport)
+        {
+            const auto str = std::string("Dir: ") + glm::to_string(m_CurrentViewport->getForward()) + ", Depth: " + std::to_string(m_CurrentViewport->getZLevel()).substr(0, 4);
+            ImGui::Text(str.c_str());
+        }
+
         ImGui::DragIntRange2("Hounsfield window", &m_HounsfieldWindowLow, &m_HounsfieldWindowHigh, 5, -3000, 2000, "Min: %d units", "Max: %d units");
 
         if (m_IsSliderDisabled)
         {
             ImGui::BeginDisabled();
         }
+
         ImGui::DragFloat("FFT", &m_FFTThreshold, 0.001f, 0.1f, 1.0f);
         if (m_IsSliderDisabled)
         {
@@ -392,17 +414,6 @@ void Renderer::drawImGui()
             ImGui::DragFloat("Blur Sigma", &m_BlurSigma, 0.01f, 0.01f, 15.0f);
         }
 
-        // TODO: use viewport coordinates instead of window coordinates
-        ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY))
-                     + ", Hounsfield value: " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
-                        .c_str());
-
-        if (m_CurrentViewport)
-        {
-            const auto str = std::string("Dir: ") + glm::to_string(m_CurrentViewport->getForward()) + ", Depth: " +  std::to_string(m_CurrentViewport->getZLevel()).substr(0, 4);
-            ImGui::Text(str.c_str());
-        }
-
         ImGui::End();
     }
 
@@ -417,7 +428,7 @@ void Renderer::uploadNew3DTexture()
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, m_PBO);
     glBindTexture(GL_TEXTURE_3D, m_3DTexture);
     glTexSubImage3D(
-        GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->getDicomImages().size()), GL_RED, GL_FLOAT, 0);
+        GL_TEXTURE_3D, 0, 0, 0, 0, m_ImageSet->getWidth(), m_ImageSet->getHeight(), GLsizei(m_ImageSet->getSlices().size()), GL_RED, GL_FLOAT, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     m_NeedUpload = false;

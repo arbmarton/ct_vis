@@ -62,6 +62,7 @@ set(HEADER_FILES
 	include/OpenGLMutex.h
 	include/Renderer.h
 	include/Shader.h
+	include/Slice.h
 	include/Utilities.h
 	include/Viewport.h
 )

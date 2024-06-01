@@ -1,9 +1,6 @@
 #include "Utilities.h"
 
-#pragma warning(push)
-#pragma warning(disable : 4005)
-#include "dcmtk/dcmimgle/dcmimage.h"
-#pragma warning(pop)
+#include "Slice.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #pragma warning(push)
@@ -84,11 +81,11 @@ std::vector<float> normalizeVector(const std::vector<float>& vec)
     return normalizedVec;
 }
 
-GLuint textureFromDicomImage(DicomImage* img)
+GLuint textureFromDicomImage(Slice* img)
 {
     OpenGLLockGuard lock;
 
-    const uint8_t* data = static_cast<const uint8_t*>(img->getOutputData(8));
+    const uint8_t* data = static_cast<const uint8_t*>(img->m_DicomImage.getOutputData(8));
 
     GLuint textureID;
     glGenTextures(1, &textureID);
@@ -96,7 +93,7 @@ GLuint textureFromDicomImage(DicomImage* img)
     if (data)
     {
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, img->getWidth(), img->getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, img->m_DicomImage.getWidth(), img->m_DicomImage.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -339,6 +336,30 @@ std::vector<std::string> splitString(const std::string& toSplit, const char ch)
     }
 
     return seglist;
+}
+
+std::vector<std::string> splitString(std::string toSplit, const std::string& delimiter)
+{
+    size_t pos = 0;
+    std::vector<std::string> seglist;
+
+    while ((pos = toSplit.find(delimiter)) != std::string::npos) {
+        seglist.push_back(toSplit.substr(0, pos));
+        toSplit.erase(0, pos + delimiter.length());
+    }
+    seglist.push_back(toSplit);
+
+    return seglist;
+}
+
+glm::vec3 vec3FromStrings(const std::vector<std::string>& v)
+{
+    if (v.size() != 3)
+    {
+        throw 0;
+    }
+
+    return glm::vec3(std::stof(v[0]), std::stof(v[1]), std::stof(v[2]));
 }
 
 std::string getFileNameFromPath(const std::filesystem::path& path)

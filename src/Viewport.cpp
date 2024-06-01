@@ -1,5 +1,8 @@
 #include "Viewport.h"
 
+#include "Globals.h"
+#include <GLFW/glfw3.h>
+
 Viewport::Viewport(
     const glm::ivec2& renderSize,
     const glm::vec2& pixelSize,
@@ -22,6 +25,14 @@ Viewport::Viewport(
 
 void Viewport::onScroll(const float yOffset)
 {
-    m_zLevel += float(yOffset * 0.01);
-    m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
+    if (glfwGetKey(Globals::instance().getOpenGLContext(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        m_fov += yOffset * 0.01f * -1.0f;
+        m_fov = glm::clamp(m_fov, 0.5f, 1.5f);
+    }
+    else
+    {
+        m_zLevel += yOffset * 0.01f;
+        m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
+    }
 }

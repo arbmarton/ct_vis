@@ -1,7 +1,9 @@
 #include "ImageLoader.h"
 
-#include "dcmtk/dcmimgle/dcmimage.h"
+#pragma warning(push)
+#pragma warning(disable : 4005)
 #include <dcmtk/dcmdata/dctk.h>
+#pragma warning(pop)
 
 #include "Utilities.h"
 
@@ -29,48 +31,78 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
 
         dicomDirectoryEntries.push_back(currentPath);
     }
-    // Force alphebetical order
-    std::sort(dicomDirectoryEntries.begin(), dicomDirectoryEntries.end());
 
     ret->m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
     ret->getPostProcessedData().resize(512 * 512 * dicomDirectoryEntries.size());
-    ret->m_DicomImages.resize(dicomDirectoryEntries.size());
+    ret->m_Slices.resize(dicomDirectoryEntries.size());
 
-    const auto threadLambda = [&](const uint32_t threadID) {
+    std::vector<std::unique_ptr<Slice>> tempDicomImages;
+    tempDicomImages.resize(dicomDirectoryEntries.size());
+    const auto dicomCreationLambda = [&](const uint32_t threadID){
         for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += m_MaxThreads)
         {
             const auto& currentPath = dicomDirectoryEntries[iter];
-            auto img = std::make_unique<DicomImage>(currentPath.string().c_str());
-            if (!img->isMonochrome())
+            auto slice = std::make_unique<Slice>(currentPath.string().c_str());
+            if (!slice->m_DicomImage.isMonochrome())
             {
                 throw 0;
             }
-            if (img->getPhotometricInterpretation() != EPI_Monochrome2)
+            if (slice->m_DicomImage.getPhotometricInterpretation() != EPI_Monochrome2)
             {
                 throw 0;
             }
             DcmFileFormat fileformat;
             fileformat.loadFile(currentPath.string().c_str());
             auto dataset = fileformat.getDataset();
-
+    
             Float64 pixelSpacing;
-            Float64 imagePosition;
+            OFString imagePositionPatient;
             Float64 sliceThickness;
             Float64 spacingBetweenSlices;
             dataset->findAndGetFloat64(DCM_PixelSpacing, pixelSpacing, 1);
-            dataset->findAndGetFloat64(DCM_ImagePositionPatient, imagePosition);
+            dataset->findAndGetOFStringArray(DCM_ImagePositionPatient, imagePositionPatient);
             dataset->findAndGetFloat64(DCM_SliceThickness, sliceThickness);
             dataset->findAndGetFloat64(DCM_SpacingBetweenSlices, spacingBetweenSlices);
 
-            Float64 rescaleIntercept;
-            Float64 rescaleSlope;
-            dataset->findAndGetFloat64(DCM_RescaleSlope, rescaleSlope);
-            dataset->findAndGetFloat64(DCM_RescaleIntercept, rescaleIntercept);
-            const auto width = img->getWidth();
-            const auto height = img->getHeight();
+            slice->m_PixelSpacig = float(pixelSpacing);
+            slice->m_SliceThickness = float(sliceThickness);
+            slice->m_SliceSpacing = float(spacingBetweenSlices);
+    
+            const glm::vec3 imagePos = utils::vec3FromStrings(utils::splitString(imagePositionPatient.c_str(), "\\"));
+            std::cout << "ZPOS: " << std::to_string(imagePos[2]) << "\n";
 
-            const auto internalPixelDataPtr = img->getInterData()->getData();
-            const auto internalRepresentation = img->getInterData()->getRepresentation();
+            slice->m_SlicePosition = imagePos;
+    
+            tempDicomImages[iter] = std::move(slice);
+        }
+    };
+
+    {
+        std::vector<std::thread> threads;
+        threads.reserve(m_MaxThreads);
+        for (uint32_t thread = 0; thread < m_MaxThreads; ++thread)
+        {
+            threads.emplace_back(dicomCreationLambda, thread);
+        }
+
+        for (auto& th : threads)
+        {
+            th.join();
+        }
+    }
+    
+    std::sort(tempDicomImages.begin(), tempDicomImages.end(), [](const auto& left, const auto& right) { return left->m_SlicePosition.z < right->m_SlicePosition.z; });
+
+    const auto dataLambda = [&](const uint32_t threadID) {
+        for (uint32_t iter = threadID; iter < tempDicomImages.size(); iter += m_MaxThreads)
+        {
+            auto& currentSlice = tempDicomImages[iter];
+
+            const auto width = currentSlice->m_DicomImage.getWidth();
+            const auto height = currentSlice->m_DicomImage.getHeight();
+
+            const auto internalPixelDataPtr = currentSlice->m_DicomImage.getInterData()->getData();
+            const auto internalRepresentation = currentSlice->m_DicomImage.getInterData()->getRepresentation();
 
             if (internalRepresentation != EPR_Sint16)
             {
@@ -83,11 +115,9 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
 
             double min;
             double max;
-            img->getMinMaxValues(min, max);
+            currentSlice->m_DicomImage.getMinMaxValues(min, max);
             std::cout << "min HU value in image: " << min << "\n";
             std::cout << "max HU value in image: " << max << "\n";
-            std::cout << "rescale slope: " << rescaleSlope << "\n";
-            std::cout << "rescale intercept: " << rescaleIntercept << "\n";
 
             for (size_t i = 0; i < width * height; ++i)
             {
@@ -105,20 +135,22 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             const auto postProcessed = utils::applyOpenCVLowPassFilter2D(floatData.data(), width, height, 1.0f);
             memcpy(&ret->getPostProcessedData()[width * height * iter], postProcessed.data(), width * height * sizeof(float));
 
-            ret->m_DicomImages[iter] = std::move(img);
+            ret->m_Slices[iter] = std::move(currentSlice);
         }
     };
 
-    std::vector<std::thread> threads;
-    threads.reserve(m_MaxThreads);
-    for (uint32_t thread = 0; thread < m_MaxThreads; ++thread)
     {
-        threads.emplace_back(threadLambda, thread);
-    }
+        std::vector<std::thread> threads;
+        threads.reserve(m_MaxThreads);
+        for (uint32_t thread = 0; thread < m_MaxThreads; ++thread)
+        {
+            threads.emplace_back(dataLambda, thread);
+        }
 
-    for (auto& th : threads)
-    {
-        th.join();
+        for (auto& th : threads)
+        {
+            th.join();
+        }
     }
 
     return ret;

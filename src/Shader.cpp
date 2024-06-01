@@ -3,6 +3,7 @@
 #include "Utilities.h"
 #include "OpenGL.h"
 #include "OpenGLMutex.h"
+#include "Renderer.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -258,11 +259,13 @@ void Shader::setVec2(const std::string& name, const glm::vec2& vec) const
 void CtViewportShader::setValues() const
 {
     setInt("texture3D", 0);
+    setVec3("upVector", Renderer::UP_DIR);
 }
 
 void CtViewportPostprocessShader::setValues() const
 {
     setInt("textureInput", 0);
+    setVec3("upVector", Renderer::UP_DIR);
 }
 
 void MainViewportShader::setValues() const

@@ -30,6 +30,7 @@ public:
     constexpr static uint32_t RENDER_WIDTH = uint32_t(512 * 3.6);
     constexpr static uint32_t RENDER_HEIGHT = uint32_t(512 * 3.6);
 #endif
+    const static glm::vec3 UP_DIR;
 
     void draw();
     void onScroll(const float yOffset);
@@ -67,7 +68,7 @@ private:
         glm::ivec2(512, 512),
         glm::vec2(RENDER_WIDTH / 2, RENDER_HEIGHT / 2),
         glm::ivec2(0, 0),
-        glm::normalize(glm::vec3(0.0f, 0.0f, -1.0f)),
+        glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)),
         0.0f,
         glm::vec3(1, 0, 0));
     Viewport m_Viewport2 = Viewport(
