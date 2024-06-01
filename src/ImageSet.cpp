@@ -34,7 +34,7 @@ std::optional<float> ImageSet::sampleHounsfieldData(const glm::vec3& v) const
     const uint32_t height = m_Slices[0]->m_DicomImage.getHeight();
     const uint32_t depth = uint32_t(m_Slices.size() - 1);
 
-    uint32_t sampleIndex = uint32_t(v.z * depth) * width * height + uint32_t(v.y * height) * width + uint32_t(v.x * width);
+    const uint32_t sampleIndex = uint32_t(v.z * depth) * width * height + uint32_t(v.y * height) * width + uint32_t(v.x * width);
 
     //std::cout << "sampling index: " << sampleIndex << "\n";
 
@@ -54,6 +54,17 @@ std::optional<float> ImageSet::sampleHounsfieldData(const glm::vec3& v) const
     // TODO: linear interpolation between multiple samples
 
     return m_HounsfieldData[sampleIndex];
+}
+
+Slice* ImageSet::sliceFromSamplingPosition(const glm::vec3& v) const
+{
+    if (glm::any(glm::lessThan(v, glm::vec3(0.0f))) || glm::any(glm::greaterThan(v, glm::vec3(1.0f)))) {
+        return nullptr;
+    }
+
+    const uint32_t depth = uint32_t(m_Slices.size() - 1);
+
+    return m_Slices[uint32_t(v.z * depth)].get();
 }
 
 void ImageSet::applyPostprocessing(const float fftParam)

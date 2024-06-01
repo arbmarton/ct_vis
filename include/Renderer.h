@@ -42,12 +42,14 @@ public:
 private:
     Renderer();
 
-    std::optional<float> samplePixel(const float xPos, const float yPos) const;
     Viewport* getViewportFromMousePosition();
     const Viewport* getViewportFromMousePosition() const;
     void drawImGui();
     void uploadNew3DTexture();
     void swapPostProcessFrameBuffers();
+    glm::vec3 calculateSamplingPositionFromMousePosition(const Viewport* viewport, const float xPos, const float yPos) const;
+    std::optional<float> getHounsfieldFromSamplingPosition(const glm::vec3& v) const;
+    Slice* getSliceFromSamplingPosition(const glm::vec3& v) const;
 
     constexpr static float m_QuadVertices[] = {
         // positions + texcoords
@@ -105,4 +107,5 @@ private:
     float m_BlurSigma = 1.0f;
 
     std::optional<float> m_LastHoveredValue{ {} };
+    Slice* m_CurrentSlice{ nullptr };
 };

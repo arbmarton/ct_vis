@@ -69,7 +69,7 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             slice->m_SliceSpacing = float(spacingBetweenSlices);
 
             const glm::vec3 imagePos = utils::vec3FromStrings(utils::splitString(imagePositionPatient.c_str(), "\\"));
-            std::cout << "ZPOS: " << std::to_string(imagePos[2]) << "\n";
+            //std::cout << "ZPOS: " << std::to_string(imagePos[2]) << "\n";
 
             slice->m_SlicePosition = imagePos;
 
@@ -117,8 +117,8 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             double min;
             double max;
             currentSlice->m_DicomImage.getMinMaxValues(min, max);
-            std::cout << "min HU value in image: " << min << "\n";
-            std::cout << "max HU value in image: " << max << "\n";
+            //std::cout << "min HU value in image: " << min << "\n";
+            //std::cout << "max HU value in image: " << max << "\n";
 
             for (size_t i = 0; i < width * height; ++i)
             {

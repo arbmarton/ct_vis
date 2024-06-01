@@ -1,6 +1,8 @@
 #include "Viewport.h"
 
 #include "Globals.h"
+#include "Renderer.h"
+#include "Utilities.h"
 #include <GLFW/glfw3.h>
 
 Viewport::Viewport(
@@ -35,4 +37,22 @@ void Viewport::onScroll(const float yOffset)
         m_zLevel += yOffset * 0.01f;
         m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
     }
+}
+
+void Viewport::onMouseMove(const float xOffset, const float yOffset)
+{
+    if (glfwGetMouseButton(Globals::instance().getOpenGLContext(), GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
+    {
+        return;
+    }
+
+    constexpr float speed = 0.001f;
+    const auto right = glm::normalize(glm::cross(m_Forward, Renderer::UP_DIR));
+    const auto up = glm::normalize(glm::cross(right, m_Forward));
+
+    const auto offset = xOffset * right * speed * -1.0f + yOffset * up * speed * -1.0f;
+
+    m_CenterOffset += offset;
+
+    m_CenterOffset = glm::clamp(m_CenterOffset, -0.5f, 0.5f);
 }

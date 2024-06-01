@@ -229,11 +229,20 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
     m_LastMouseX = float(xPos);
     m_LastMouseY = float(yPos);
 
-    (void)xOffset;
-    (void)yOffset;
-
     m_CurrentViewport = getViewportFromMousePosition();
-    m_LastHoveredValue = samplePixel(xPos, yPos);
+    if (m_CurrentViewport)
+    {
+        m_CurrentViewport->onMouseMove(xOffset, yOffset);
+
+        const auto samplingPos = calculateSamplingPositionFromMousePosition(m_CurrentViewport, xPos, yPos);
+        m_LastHoveredValue = getHounsfieldFromSamplingPosition(samplingPos);
+        m_CurrentSlice = getSliceFromSamplingPosition(samplingPos);
+    }
+    else
+    {
+        m_LastHoveredValue = {};
+        m_CurrentSlice = nullptr;
+    }
 }
 
 void Renderer::onMouseButton(const int button, const int action, const int /*mods*/)
@@ -257,14 +266,8 @@ void Renderer::setImageSet(std::unique_ptr<ImageSet> imgset)
     m_3DTexture = utils::texture3DFromData(m_ImageSet->getHounsfieldData());
 }
 
-std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) const
+glm::vec3 Renderer::calculateSamplingPositionFromMousePosition(const Viewport* viewport, const float xPos, const float yPos) const
 {
-    const auto viewport = getViewportFromMousePosition();
-    if (!viewport)
-    {
-        return {};
-    }
-
     float x = ((xPos - viewport->getWindowOffset().x) / viewport->getPixelWidth()) * viewport->getRenderWidth();
     float y = ((yPos - viewport->getWindowOffset().y) / viewport->getPixelHeight()) * viewport->getRenderHeight();
 
@@ -279,14 +282,20 @@ std::optional<float> Renderer::samplePixel(const float xPos, const float yPos) c
 
     const auto forw = viewport->getForward();
     const auto fov = viewport->getFov();
-    glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset();
-    glm::vec3 right = glm::normalize(glm::cross(viewport->getForward(), UP_DIR)) * fov;
-    glm::vec3 up = glm::normalize(glm::cross(right, viewport->getForward())) * fov;
-    glm::vec3 samplingPosition =
-        center + right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + viewport->getForward() * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
+    const glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset();
+    const glm::vec3 right = glm::normalize(glm::cross(viewport->getForward(), UP_DIR)) * fov;
+    const glm::vec3 up = glm::normalize(glm::cross(right, viewport->getForward())) * fov;
+    return center + right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + viewport->getForward() * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
+}
 
-    //std::cout << glm::to_string(samplingPosition) << "\n";
-    return m_ImageSet->sampleHounsfieldData(samplingPosition);
+std::optional<float> Renderer::getHounsfieldFromSamplingPosition(const glm::vec3& v) const
+{
+    return m_ImageSet->sampleHounsfieldData(v);
+}
+
+Slice* Renderer::getSliceFromSamplingPosition(const glm::vec3& v) const
+{
+    return m_ImageSet->sliceFromSamplingPosition(v);
 }
 
 Viewport* Renderer::getViewportFromMousePosition()
@@ -349,6 +358,7 @@ void Renderer::drawImGui()
         ImGui::Text(("X: " + std::to_string(int(m_LastMouseX)) + ",Y: " + std::to_string(int(m_LastMouseY))
                      + ", Hounsfield value: " + (m_LastHoveredValue ? std::to_string(int(round(*m_LastHoveredValue))) : "---"))
                         .c_str());
+        ImGui::Text(("Slice filename: " + (m_CurrentSlice ? m_CurrentSlice->m_FileName : "----")).c_str());
 
         if (m_CurrentViewport)
         {

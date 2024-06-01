@@ -21,6 +21,7 @@ public:
         const glm::vec3& color);
 
     void onScroll(const float yOffset);
+    void onMouseMove(const float xOffset, const float yOffset);
     const FloatFramebuffer& getDataFrameBuffer() const
     {
         return m_Databuffer;
@@ -84,7 +85,7 @@ private:
     const FloatFramebuffer m_Databuffer;
     const Framebuffer m_Colorbuffer;
 
-    glm::vec3 m_CenterOffset = glm::vec3(0.5, 0, 0);
+    glm::vec3 m_CenterOffset = glm::vec3(0.0, 0, 0);
     glm::vec3 m_Forward;
     float m_zLevel;
     float m_fov = 1.0f;

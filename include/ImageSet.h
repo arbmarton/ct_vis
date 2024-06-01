@@ -30,6 +30,7 @@ public:
     std::vector<float>& getPostProcessedData();
 
     std::optional<float> sampleHounsfieldData(const glm::vec3& v) const;
+    Slice* sliceFromSamplingPosition(const glm::vec3& v) const;
     void applyPostprocessing(const float fftParam);
     size_t getByteSize() const;
     uint32_t getWidth() const;
