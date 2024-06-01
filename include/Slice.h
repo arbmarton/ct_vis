@@ -17,7 +17,12 @@ struct Slice {
 		: m_DicomImage(DicomImage(str.c_str()))
 	{
 	}
+	Slice(const Slice& rhs) = delete;
+	Slice(Slice&& rhs) = delete;
 	Slice() = delete;
+
+	Slice& operator=(const Slice& rhs) = delete;
+	Slice& operator=(Slice&& rhs) = delete;
 
 	DicomImage m_DicomImage;
 	glm::vec3 m_SlicePosition;

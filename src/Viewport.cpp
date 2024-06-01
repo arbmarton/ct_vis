@@ -27,7 +27,7 @@ void Viewport::onScroll(const float yOffset)
 {
     if (glfwGetKey(Globals::instance().getOpenGLContext(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
-        m_fov += yOffset * 0.01f * -1.0f;
+        m_fov += yOffset * 0.02f * -1.0f;
         m_fov = glm::clamp(m_fov, 0.5f, 1.5f);
     }
     else

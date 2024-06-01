@@ -362,6 +362,22 @@ glm::vec3 vec3FromStrings(const std::vector<std::string>& v)
     return glm::vec3(std::stof(v[0]), std::stof(v[1]), std::stof(v[2]));
 }
 
+std::string vec3ToString(const glm::vec3& v, const uint8_t decimals)
+{
+    const auto lambda = [&](const float input) {
+        const auto str = std::to_string(input);
+        const auto split = splitString(str, '.');
+        if (split[1].size() > decimals) {
+            return split[0] + "." + split[1].substr(0, decimals);
+        }
+        else {
+            return str;
+        }
+    };
+
+    return "(" + lambda(v.x) + "," + lambda(v.y) + "," + lambda(v.z) + ")";
+}
+
 std::string getFileNameFromPath(const std::filesystem::path& path)
 {
     return getFileNameFromPath(path.string());

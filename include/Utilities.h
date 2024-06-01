@@ -77,6 +77,7 @@ std::filesystem::path getSoundPath(const std::string& soundName);
 std::vector<std::string> splitString(const std::string& toSplit, const char ch);
 std::vector<std::string> splitString(std::string toSplit, const std::string& delimiter);
 glm::vec3 vec3FromStrings(const std::vector<std::string>& v);
+std::string vec3ToString(const glm::vec3& v, const uint8_t decimals = std::numeric_limits<uint8_t>::max());
 std::string getFileNameFromPath(const std::filesystem::path& path);
 std::string getFileNameFromPath(const std::string& path);
 void writeToFile(const std::string& content, const std::string& filePath, const std::string& fileName);

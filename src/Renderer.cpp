@@ -350,7 +350,7 @@ void Renderer::drawImGui()
 
         if (m_CurrentViewport)
         {
-            const auto str = std::string("Dir: ") + glm::to_string(m_CurrentViewport->getForward()) + ", Depth: " + std::to_string(m_CurrentViewport->getZLevel()).substr(0, 4);
+            const auto str = std::string("Dir: ") + utils::vec3ToString(m_CurrentViewport->getForward(), 2) + ", Depth: " + std::to_string(m_CurrentViewport->getZLevel()).substr(0, 4) + ", Fov: " + std::to_string(m_CurrentViewport->getFov()).substr(0, 4);
             ImGui::Text(str.c_str());
         }
 
