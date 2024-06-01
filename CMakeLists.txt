@@ -77,6 +77,7 @@ set(SOURCE_FILES
 	src/OpenGLMutex.cpp
 	src/Renderer.cpp
 	src/Shader.cpp
+	src/Slice.cpp
 	src/Utilities.cpp
 	src/Viewport.cpp
 )

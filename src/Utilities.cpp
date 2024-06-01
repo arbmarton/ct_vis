@@ -9,7 +9,6 @@
 #include <gtx/string_cast.hpp>
 #pragma warning(pop)
 
-#include "BasicDraw.h"
 #include "OpenGLMutex.h"
 
 #pragma warning(push)

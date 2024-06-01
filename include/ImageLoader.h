@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ImageSet.h"
-
 #include <filesystem>
 #include <memory>
+
+class ImageSet;
 
 class ImageLoader
 {

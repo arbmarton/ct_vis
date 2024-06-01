@@ -2,7 +2,7 @@
 
 #include "Globals.h"
 #include "Renderer.h"
-#include "Utilities.h"
+
 #include <GLFW/glfw3.h>
 
 Viewport::Viewport(

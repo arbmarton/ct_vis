@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Utilities.h"
-
 #pragma warning(push)
 #pragma warning(disable : 4005)
-#include "dcmtk/dcmimgle/dcmimage.h"
+#pragma warning(disable : 4251)
+#include <dcmtk/dcmimgle/dcmimage.h>
 #pragma warning(pop)
 
 #pragma warning(push)
@@ -13,15 +12,10 @@
 #pragma warning(pop)
 
 #include <string>
-#include <vector>
 
 struct Slice
 {
-    Slice(const std::string& str)
-        : m_DicomImage(DicomImage(str.c_str()))
-        , m_FileName(utils::splitString(str, '/').back())
-    {
-    }
+    Slice(const std::string& str);
     Slice(const Slice& rhs) = delete;
     Slice(Slice&& rhs) = delete;
     Slice() = delete;

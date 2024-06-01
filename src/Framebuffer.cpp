@@ -1,6 +1,5 @@
 #include "Framebuffer.h"
 
-#include "Renderer.h"
 #include "OpenGLMutex.h"
 
 #include <iostream>

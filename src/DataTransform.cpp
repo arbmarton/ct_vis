@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <iostream>
+//#include <iostream>
 
 namespace data {
 std::vector<uint8_t> transformHUtoPixels(const std::vector<float>& input, const float lowerWindow, const float upperWindow)
@@ -17,7 +17,7 @@ std::vector<uint8_t> transformHUtoPixels(const std::vector<float>& input, const 
         }
         if (input[i] > max)
         {
-            std::cout << input[i] << "\n";
+            //std::cout << input[i] << "\n";
             max = input[i];
         }
     }

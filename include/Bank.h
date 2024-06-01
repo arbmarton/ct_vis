@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Shader.h"
-#include "Utilities.h"
-
-#include "glad/glad.h"
 
 #include <unordered_map>
 #include <memory>

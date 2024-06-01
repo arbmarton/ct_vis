@@ -1,13 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "BasicDraw.h"
 #include "ImageLoader.h"
 #include "OpenGL.h"
 #include "Renderer.h"
 #include "Utilities.h"
 #include "Bank.h"
-#include "DataTransform.h"
 #include "Globals.h"
 
 #include <iostream>

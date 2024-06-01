@@ -1,14 +1,16 @@
 #include "ImageLoader.h"
 
+#include "Utilities.h"
+#include "ImageSet.h"
+
 #pragma warning(push)
 #pragma warning(disable : 4005)
-#include <dcmtk/dcmdata/dctk.h>
+#pragma warning(disable : 4251)
+#include <dcmtk/dcmdata/dcfilefo.h>
+#include <dcmtk/dcmdata/dcdeftag.h>
 #pragma warning(pop)
 
-#include "Utilities.h"
-
 #include <thread>
-#include <mutex>
 
 ImageLoader::ImageLoader(const std::filesystem::path& folderPath, const uint32_t maxThreads)
     : m_Folder(folderPath)
