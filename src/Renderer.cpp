@@ -167,6 +167,8 @@ void Renderer::draw()
         ctPostprocessShader->setFloat("otherZ2", other2.getZLevel());
         ctPostprocessShader->setFloat("fov", viewport.getFov());
         ctPostprocessShader->setVec3("centerOffset", viewport.getCenterOffset());
+        ctPostprocessShader->setVec3("otherCenterOffset1", other1.getCenterOffset());
+        ctPostprocessShader->setVec3("otherCenterOffset2", other2.getCenterOffset());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_LastPostProcessFrameBuffer->m_TexColorBuffer);

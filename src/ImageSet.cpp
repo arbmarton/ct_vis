@@ -26,7 +26,8 @@ std::vector<float>& ImageSet::getPostProcessedData()
 
 std::optional<float> ImageSet::sampleHounsfieldData(const glm::vec3& v) const
 {
-    if (glm::any(glm::lessThan(v, glm::vec3(0.0f))) || glm::any(glm::greaterThan(v, glm::vec3(1.0f)))) {
+    if (glm::any(glm::lessThan(v, glm::vec3(0.0f))) || glm::any(glm::greaterThan(v, glm::vec3(1.0f))))
+    {
         return {};
     }
 
@@ -58,7 +59,8 @@ std::optional<float> ImageSet::sampleHounsfieldData(const glm::vec3& v) const
 
 Slice* ImageSet::sliceFromSamplingPosition(const glm::vec3& v) const
 {
-    if (glm::any(glm::lessThan(v, glm::vec3(0.0f))) || glm::any(glm::greaterThan(v, glm::vec3(1.0f)))) {
+    if (glm::any(glm::lessThan(v, glm::vec3(0.0f))) || glm::any(glm::greaterThan(v, glm::vec3(1.0f))))
+    {
         return nullptr;
     }
 
