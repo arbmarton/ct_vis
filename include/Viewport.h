@@ -30,10 +30,7 @@ public:
     {
         return m_Colorbuffer;
     }
-    glm::vec3 getForward() const
-    {
-        return m_Forward;
-    }
+    glm::vec3 getForward() const;
     float getZLevel() const
     {
         return m_zLevel;
@@ -74,6 +71,22 @@ public:
     {
         return m_CenterOffset;
     }
+    void setRotationVertical(const float val)
+    {
+        m_RotationVertical = val;
+    }
+    float getRotationVertical() const
+    {
+        return m_RotationVertical;
+    }
+    void setRotationHorizontal(const float val)
+    {
+        m_RotationHorizontal = val;
+    }
+    float getRotationHorizontal() const
+    {
+        return m_RotationHorizontal;
+    }
 
 private:
     const uint32_t m_RenderWidth;
@@ -86,9 +99,10 @@ private:
     const Framebuffer m_Colorbuffer;
 
     glm::vec3 m_CenterOffset = glm::vec3(0.0, 0, 0);
-    glm::vec3 m_Forward;
     float m_zLevel;
     float m_fov = 1.0f;
+    float m_RotationHorizontal;
+    float m_RotationVertical;
 
     const glm::vec3 m_Color;
 };

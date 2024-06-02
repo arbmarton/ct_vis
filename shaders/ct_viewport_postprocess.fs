@@ -41,9 +41,11 @@ void main()
 	vec3 right = normalize(cross(forward, upVector)) * fov;
 	vec3 up = normalize(cross(right, forward)) * fov;
 
-	vec3 samplingPosition = center + centerOffset + 
+	vec3 samplingPosition = 
+		center + 
+		centerOffset + 
 		right * (TexCoords.x * 2.0 - 1.0) * 0.5 + 
-		up * ((TexCoords.y) * 2.0 - 1.0) * 0.5 +
+		up * (TexCoords.y * 2.0 - 1.0) * 0.5 +
 		forward * (zLevel * 2.0 - 1.0) * 0.5;
 
 	float dotProduct1 = calculateViewingAngleForOtherViewport(samplingPosition, otherCenterOffset1, otherForward1, otherZ1);
