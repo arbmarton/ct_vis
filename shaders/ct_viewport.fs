@@ -10,6 +10,7 @@ uniform float fov;
 uniform vec3 forward;
 uniform vec3 upVector;
 uniform vec3 centerOffset;
+uniform vec3 pixelSpacing;
 
 vec3 center = vec3(0.5, 0.5, 0.5) + centerOffset;
 
@@ -20,8 +21,9 @@ void main()
 
 	vec3 samplingPosition = center + 
 		right * (TexCoords.x * 2.0 - 1.0) * 0.5 + 
-		up * ((TexCoords.y) * 2.0 - 1.0) * 0.5 +
+		up * (TexCoords.y * 2.0 - 1.0) * 0.5 +
 		forward * (zLevel * 2.0 - 1.0) * 0.5;
+	samplingPosition /= pixelSpacing;
 
 	vec4 sampled;
 	if (any(greaterThan(samplingPosition, vec3(1.0))) || any(lessThan(samplingPosition, vec3(0.0)))) {

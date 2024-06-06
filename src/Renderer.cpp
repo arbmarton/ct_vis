@@ -107,6 +107,9 @@ void Renderer::draw()
         ctViewportShader->setVec3("forward", viewport.getForward());
         ctViewportShader->setFloat("fov", viewport.getFov());
         ctViewportShader->setVec3("centerOffset", viewport.getCenterOffset());
+        ctViewportShader->setFloat("xSpacing", m_ImageSet->getXSpacing());
+        ctViewportShader->setFloat("ySpacing", m_ImageSet->getYSpacing());
+        ctViewportShader->setVec3("pixelSpacing", m_ImageSet->getSpacingVector());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
@@ -169,6 +172,7 @@ void Renderer::draw()
         ctPostprocessShader->setVec3("centerOffset", viewport.getCenterOffset());
         ctPostprocessShader->setVec3("otherCenterOffset1", other1.getCenterOffset());
         ctPostprocessShader->setVec3("otherCenterOffset2", other2.getCenterOffset());
+        ctPostprocessShader->setVec3("pixelSpacing", m_ImageSet->getSpacingVector());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_LastPostProcessFrameBuffer->m_TexColorBuffer);
@@ -289,7 +293,9 @@ glm::vec3 Renderer::calculateSamplingPositionFromMousePosition(const Viewport* v
     const glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset();
     const glm::vec3 right = glm::normalize(glm::cross(forw, UP_DIR)) * fov;
     const glm::vec3 up = glm::normalize(glm::cross(right, forw)) * fov;
-    return center + right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + forw * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
+    const auto temp = center + right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + forw * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
+    const auto spacings = m_ImageSet->getSpacingVector();
+    return temp / spacings;
 }
 
 std::optional<float> Renderer::getHounsfieldFromSamplingPosition(const glm::vec3& v) const

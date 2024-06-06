@@ -14,6 +14,8 @@ uniform float maxWindow;
 uniform vec3 upVector;
 uniform vec3 centerOffset;
 
+uniform vec3 pixelSpacing;
+
 uniform vec3 otherColor1;
 uniform vec3 otherColor2;
 uniform vec3 otherForward1;
@@ -47,6 +49,7 @@ void main()
 		right * (TexCoords.x * 2.0 - 1.0) * 0.5 + 
 		up * (TexCoords.y * 2.0 - 1.0) * 0.5 +
 		forward * (zLevel * 2.0 - 1.0) * 0.5;
+	samplingPosition /= pixelSpacing;
 
 	float dotProduct1 = calculateViewingAngleForOtherViewport(samplingPosition, otherCenterOffset1, otherForward1, otherZ1);
 	float dotProduct2 = calculateViewingAngleForOtherViewport(samplingPosition, otherCenterOffset2,  otherForward2, otherZ2);

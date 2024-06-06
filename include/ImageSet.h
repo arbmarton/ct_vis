@@ -35,6 +35,10 @@ public:
     size_t getByteSize() const;
     uint32_t getWidth() const;
     uint32_t getHeight() const;
+    float getXSpacing() const;
+    float getYSpacing() const;
+    float getZSpacing() const;
+    glm::vec3 getSpacingVector() const;
 
 private:
     std::vector<std::unique_ptr<Slice>> m_Slices;

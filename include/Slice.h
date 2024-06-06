@@ -28,5 +28,6 @@ struct Slice
     glm::vec3 m_SlicePosition;
     float m_SliceThickness;
     float m_SliceSpacing;
-    float m_PixelSpacig;
+    float m_xPixelSpacing;
+    float m_yPixelSpacing;
 };

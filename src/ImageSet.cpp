@@ -115,3 +115,23 @@ uint32_t ImageSet::getHeight() const
 {
     return m_Slices[0]->m_DicomImage.getHeight();
 }
+
+float ImageSet::getXSpacing() const
+{
+    return m_Slices[0]->m_xPixelSpacing;
+}
+
+float ImageSet::getYSpacing() const
+{
+    return m_Slices[0]->m_yPixelSpacing;
+}
+
+float ImageSet::getZSpacing() const
+{
+    return m_Slices[0]->m_SliceThickness;
+}
+
+glm::vec3 ImageSet::getSpacingVector() const
+{
+    return { 1.0f, getYSpacing() / getXSpacing(), getZSpacing() / getXSpacing() };
+}

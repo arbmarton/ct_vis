@@ -57,16 +57,27 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             fileformat.loadFile(currentPath.string().c_str());
             auto dataset = fileformat.getDataset();
 
-            Float64 pixelSpacing;
             OFString imagePositionPatient;
             Float64 sliceThickness;
             Float64 spacingBetweenSlices;
-            dataset->findAndGetFloat64(DCM_PixelSpacing, pixelSpacing, 1);
             dataset->findAndGetOFStringArray(DCM_ImagePositionPatient, imagePositionPatient);
             dataset->findAndGetFloat64(DCM_SliceThickness, sliceThickness);
             dataset->findAndGetFloat64(DCM_SpacingBetweenSlices, spacingBetweenSlices);
 
-            slice->m_PixelSpacig = float(pixelSpacing);
+            OFString xSpacingStr;
+            dataset->findAndGetOFString(DCM_PixelSpacing, xSpacingStr);
+            if (xSpacingStr.length() > 0)
+            {
+                slice->m_xPixelSpacing = float(atof(xSpacingStr.c_str()));
+            }
+
+            OFString ySpacingStr;
+            dataset->findAndGetOFString(DCM_PixelSpacing, ySpacingStr, 1);
+            if (ySpacingStr.length() > 0)
+            {
+                slice->m_yPixelSpacing = float(atof(ySpacingStr.c_str()));
+            }
+
             slice->m_SliceThickness = float(sliceThickness);
             slice->m_SliceSpacing = float(spacingBetweenSlices);
 
