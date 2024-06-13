@@ -107,8 +107,6 @@ void Renderer::draw()
         ctViewportShader->setVec3("forward", viewport.getForward());
         ctViewportShader->setFloat("fov", viewport.getFov());
         ctViewportShader->setVec3("centerOffset", viewport.getCenterOffset());
-        ctViewportShader->setFloat("xSpacing", m_ImageSet->getXSpacing());
-        ctViewportShader->setFloat("ySpacing", m_ImageSet->getYSpacing());
         ctViewportShader->setVec3("pixelSpacing", m_ImageSet->getSpacingVector());
 
         glActiveTexture(GL_TEXTURE0);
