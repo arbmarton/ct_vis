@@ -49,7 +49,7 @@ void Viewport::onScroll(const float yOffset)
     else
     {
         m_zLevel += yOffset * 0.01f;
-        m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
+        //m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
     }
 }
 

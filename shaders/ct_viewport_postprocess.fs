@@ -33,7 +33,7 @@ vec3 center = vec3(0.5, 0.5, 0.5);
 
 float calculateViewingAngleForOtherViewport(vec3 samplingPosition, vec3 otherCenterOffset, vec3 otherForward, float otherZ)
 {
-	vec3 otherPoint = center + otherCenterOffset + otherForward * (otherZ * 2.0 - 1.0) * 0.5;
+	vec3 otherPoint = center + otherCenterOffset + otherForward * otherZ / pixelSpacing;
 	vec3 diff = otherPoint - samplingPosition;
 	return dot(diff, otherForward);
 }
@@ -43,13 +43,11 @@ void main()
 	vec3 right = normalize(cross(forward, upVector)) * fov;
 	vec3 up = normalize(cross(right, forward)) * fov;
 
-	vec3 samplingPosition = 
-		center + 
-		centerOffset + 
-		right * (TexCoords.x * 2.0 - 1.0) * 0.5 + 
+	vec3 samplingPosition = right * (TexCoords.x * 2.0 - 1.0) * 0.5 + 
 		up * (TexCoords.y * 2.0 - 1.0) * 0.5 +
-		forward * (zLevel * 2.0 - 1.0) * 0.5;
+		forward * zLevel;
 	samplingPosition /= pixelSpacing;
+	samplingPosition += center + centerOffset;
 
 	float dotProduct1 = calculateViewingAngleForOtherViewport(samplingPosition, otherCenterOffset1, otherForward1, otherZ1);
 	float dotProduct2 = calculateViewingAngleForOtherViewport(samplingPosition, otherCenterOffset2,  otherForward2, otherZ2);

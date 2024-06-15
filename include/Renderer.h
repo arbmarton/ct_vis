@@ -78,14 +78,14 @@ private:
         glm::vec2(RENDER_WIDTH / 2, RENDER_HEIGHT / 2),
         glm::ivec2(RENDER_WIDTH / 2, 0),
         glm::normalize(glm::vec3(1.0f, 0.0f, 0.0f)),
-        0.5f,
+        0.0f,
         glm::vec3(0, 1, 0));
     Viewport m_Viewport3 = Viewport(
         glm::ivec2(512, 512),
         glm::vec2(RENDER_WIDTH / 2, RENDER_HEIGHT / 2),
         glm::ivec2(0, RENDER_HEIGHT / 2),
         glm::normalize(glm::vec3(0.0001f, 0.9999f, 0.0f)),
-        0.5f,
+        0.0f,
         glm::vec3(0, 0, 1));
     Viewport* m_CurrentViewport = nullptr;
 

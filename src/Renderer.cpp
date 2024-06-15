@@ -287,13 +287,16 @@ glm::vec3 Renderer::calculateSamplingPositionFromMousePosition(const Viewport* v
 
     const auto forw = viewport->getForward();
     const auto fov = viewport->getFov();
+    const auto spacings = m_ImageSet->getSpacingVector();
 
     const glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset();
     const glm::vec3 right = glm::normalize(glm::cross(forw, UP_DIR)) * fov;
     const glm::vec3 up = glm::normalize(glm::cross(right, forw)) * fov;
-    const auto temp = center + right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + forw * (viewport->getZLevel() * 2.0f - 1.0f) * 0.5f;
-    const auto spacings = m_ImageSet->getSpacingVector();
-    return temp / spacings;
+    glm::vec3 temp = right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + forw * viewport->getZLevel();
+    temp /= spacings;
+    temp += center;
+
+    return temp;
 }
 
 std::optional<float> Renderer::getHounsfieldFromSamplingPosition(const glm::vec3& v) const
