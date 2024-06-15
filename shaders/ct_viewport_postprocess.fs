@@ -13,6 +13,8 @@ uniform float minWindow;
 uniform float maxWindow;
 uniform vec3 upVector;
 uniform vec3 centerOffset;
+uniform vec3 right;
+uniform vec3 up;
 
 uniform vec3 pixelSpacing;
 
@@ -40,11 +42,8 @@ float calculateViewingAngleForOtherViewport(vec3 samplingPosition, vec3 otherCen
 
 void main()
 { 
-	vec3 right = normalize(cross(forward, upVector)) * fov;
-	vec3 up = normalize(cross(right, forward)) * fov;
-
-	vec3 samplingPosition = right * (TexCoords.x * 2.0 - 1.0) * 0.5 + 
-		up * (TexCoords.y * 2.0 - 1.0) * 0.5 +
+	vec3 samplingPosition = right * (TexCoords.x * 2.0 - 1.0) * 0.5 * fov + 
+		up * (TexCoords.y * 2.0 - 1.0) * 0.5 * fov +
 		forward * zLevel;
 	samplingPosition /= pixelSpacing;
 	samplingPosition += center + centerOffset;

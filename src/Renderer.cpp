@@ -108,6 +108,8 @@ void Renderer::draw()
         ctViewportShader->setFloat("fov", viewport.getFov());
         ctViewportShader->setVec3("centerOffset", viewport.getCenterOffset());
         ctViewportShader->setVec3("pixelSpacing", m_ImageSet->getSpacingVector());
+        ctViewportShader->setVec3("right", viewport.getRight());
+        ctViewportShader->setVec3("up", viewport.getUp());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_3D, m_3DTexture);
@@ -171,6 +173,8 @@ void Renderer::draw()
         ctPostprocessShader->setVec3("otherCenterOffset1", other1.getCenterOffset());
         ctPostprocessShader->setVec3("otherCenterOffset2", other2.getCenterOffset());
         ctPostprocessShader->setVec3("pixelSpacing", m_ImageSet->getSpacingVector());
+        ctPostprocessShader->setVec3("up", viewport.getUp());
+        ctPostprocessShader->setVec3("right", viewport.getRight());
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_LastPostProcessFrameBuffer->m_TexColorBuffer);
@@ -213,7 +217,7 @@ void Renderer::onScroll(const float yOffset)
 {
     if (auto viewport = getViewportFromMousePosition())
     {
-        viewport->onScroll(yOffset);
+        viewport->onScroll(yOffset, m_ImageSet->getSpacingVector());
     }
 }
 
@@ -290,9 +294,9 @@ glm::vec3 Renderer::calculateSamplingPositionFromMousePosition(const Viewport* v
     const auto spacings = m_ImageSet->getSpacingVector();
 
     const glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset();
-    const glm::vec3 right = glm::normalize(glm::cross(forw, UP_DIR)) * fov;
-    const glm::vec3 up = glm::normalize(glm::cross(right, forw)) * fov;
-    glm::vec3 temp = right * (x * 2.0f - 1.0f) * 0.5f + up * (y * 2.0f - 1.0f) * 0.5f + forw * viewport->getZLevel();
+    const glm::vec3 right = viewport->getRight();
+    const glm::vec3 up = viewport->getUp();
+    glm::vec3 temp = right * (x * 2.0f - 1.0f) * 0.5f * fov + up * (y * 2.0f - 1.0f) * 0.5f * fov + forw * viewport->getZLevel();
     temp /= spacings;
     temp += center;
 

@@ -20,7 +20,7 @@ public:
         const float zLevel,
         const glm::vec3& color);
 
-    void onScroll(const float yOffset);
+    void onScroll(const float yOffset, const glm::vec3& sliceSpacings);
     void onMouseMove(const float xOffset, const float yOffset);
     const FloatFramebuffer& getDataFrameBuffer() const
     {
@@ -87,6 +87,9 @@ public:
     {
         return m_RotationHorizontal;
     }
+    glm::vec3 getRight() const;
+    glm::vec3 getUp() const;
+    glm::mat3 getLocalTransform() const;
 
 private:
     const uint32_t m_RenderWidth;

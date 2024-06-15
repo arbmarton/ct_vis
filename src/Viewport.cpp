@@ -8,6 +8,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <ranges>
+
 Viewport::Viewport(
     const glm::ivec2& renderSize,
     const glm::vec2& pixelSize,
@@ -39,7 +41,7 @@ glm::vec3 Viewport::getForward() const
     return verticalRotation * horizontalRotation * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 }
 
-void Viewport::onScroll(const float yOffset)
+void Viewport::onScroll(const float yOffset, const glm::vec3& sliceSpacings)
 {
     if (glfwGetKey(Globals::instance().getOpenGLContext(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
@@ -49,7 +51,36 @@ void Viewport::onScroll(const float yOffset)
     else
     {
         m_zLevel += yOffset * 0.01f;
-        //m_zLevel = glm::clamp(m_zLevel, 0.0f, 1.0f);
+
+        // finds the distance from a point in a box to the wall of the box
+        // https://chatgpt.com/share/f1db0cd7-05a3-4528-910a-f4313ba6bd10
+        const auto lambda = [&](const glm::vec3& forward, const glm::vec3& center) {
+            std::vector<float> distances;
+
+            const float t_xmin = (-1.0f * sliceSpacings.x / 2.0f - center.x) / forward.x;
+            const float t_xmax = (sliceSpacings.x / 2.0f - center.x) / forward.x;
+
+            const float t_ymin = (-1.0f * sliceSpacings.y / 2.0f - center.y) / forward.y;
+            const float t_ymax = (sliceSpacings.y / 2.0f - center.y) / forward.y;
+
+            const float t_zmin = (-1.0f * sliceSpacings.z / 2.0f - center.z) / forward.z;
+            const float t_zmax = (sliceSpacings.z / 2.0f - center.z) / forward.z;
+
+            distances.push_back(t_xmin);
+            distances.push_back(t_xmax);
+            distances.push_back(t_ymin);
+            distances.push_back(t_ymax);
+            distances.push_back(t_zmin);
+            distances.push_back(t_zmax);
+
+            auto positiveElements = distances | std::ranges::views::filter([](const float a) { return a > 0.0f; });
+            return *std::ranges::min_element(positiveElements);
+        };
+
+        const float forwardDistance = lambda(glm::normalize(getForward()), m_CenterOffset);
+        const float backwardDistance = lambda(glm::normalize(-1.0f * getForward()), m_CenterOffset);
+
+        m_zLevel = glm::clamp(m_zLevel, -1.0f * backwardDistance, forwardDistance);
     }
 }
 
@@ -74,4 +105,19 @@ void Viewport::onMouseMove(const float xOffset, const float yOffset)
         m_RotationVertical += yOffset * speed;
         m_RotationVertical = glm::clamp(m_RotationVertical, glm::pi<float>() / 2 * -1.0f + 0.001f, glm::pi<float>() / 2 - 0.001f);
     }
+}
+
+glm::vec3 Viewport::getRight() const
+{
+    return glm::normalize(glm::cross(getForward(), Renderer::UP_DIR));
+}
+
+glm::vec3 Viewport::getUp() const
+{
+    return glm::normalize(glm::cross(getRight(), getForward()));
+}
+
+glm::mat3 Viewport::getLocalTransform() const
+{
+    return glm::transpose(glm::mat3(getRight(), getUp(), glm::normalize(getForward())));
 }
