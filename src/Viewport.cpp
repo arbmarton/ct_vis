@@ -38,7 +38,7 @@ glm::vec3 Viewport::getForward() const
     const auto temp = horizontalRotation * glm::vec4(0, 0, 1, 1);
     const auto verticalRotation = glm::rotate(glm::mat4(1.0f), m_RotationVertical, glm::cross(glm::vec3(temp), Renderer::UP_DIR));
 
-    return verticalRotation * horizontalRotation * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    return glm::normalize(glm::vec3(verticalRotation * horizontalRotation * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)));
 }
 
 void Viewport::onScroll(const float yOffset, const glm::vec3& sliceSpacings)
@@ -89,10 +89,7 @@ void Viewport::onMouseMove(const float xOffset, const float yOffset)
     if (glfwGetMouseButton(Globals::instance().getOpenGLContext(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
         constexpr float speed = 0.001f;
-        const auto right = glm::normalize(glm::cross(getForward(), Renderer::UP_DIR));
-        const auto up = glm::normalize(glm::cross(right, getForward()));
-
-        const auto offset = xOffset * right * speed * -1.0f + yOffset * up * speed * -1.0f;
+        const auto offset = xOffset * getRight() * speed * -1.0f + yOffset * getUp() * speed * -1.0f;
 
         m_CenterOffset += offset;
 

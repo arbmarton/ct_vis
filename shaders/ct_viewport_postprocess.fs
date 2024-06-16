@@ -46,7 +46,7 @@ void main()
 		up * (TexCoords.y * 2.0 - 1.0) * 0.5 * fov +
 		forward * zLevel;
 	samplingPosition /= pixelSpacing;
-	samplingPosition += center + centerOffset;
+	samplingPosition += center + centerOffset / pixelSpacing;
 
 	float dotProduct1 = calculateViewingAngleForOtherViewport(samplingPosition, otherCenterOffset1, otherForward1, otherZ1);
 	float dotProduct2 = calculateViewingAngleForOtherViewport(samplingPosition, otherCenterOffset2,  otherForward2, otherZ2);

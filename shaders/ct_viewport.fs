@@ -22,7 +22,7 @@ void main()
 		up * (TexCoords.y * 2.0 - 1.0) * 0.5 * fov +
 		forward * zLevel;
 	samplingPosition /= pixelSpacing;
-	samplingPosition += center + centerOffset;
+	samplingPosition += center + centerOffset / pixelSpacing;
 
 	vec4 sampled;
 	if (any(greaterThan(samplingPosition, vec3(1.0))) || any(lessThan(samplingPosition, vec3(0.0)))) {

@@ -293,7 +293,7 @@ glm::vec3 Renderer::calculateSamplingPositionFromMousePosition(const Viewport* v
     const auto fov = viewport->getFov();
     const auto spacings = m_ImageSet->getSpacingVector();
 
-    const glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset();
+    const glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + viewport->getCenterOffset() / spacings;
     const glm::vec3 right = viewport->getRight();
     const glm::vec3 up = viewport->getUp();
     glm::vec3 temp = right * (x * 2.0f - 1.0f) * 0.5f * fov + up * (y * 2.0f - 1.0f) * 0.5f * fov + forw * viewport->getZLevel();
