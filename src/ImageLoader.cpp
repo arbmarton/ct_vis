@@ -16,13 +16,6 @@ ImageLoader::ImageLoader(const std::filesystem::path& folderPath, const uint32_t
     : m_Folder(folderPath)
     , m_MaxThreads(maxThreads == 0 ? std::thread::hardware_concurrency() : maxThreads)
 {
-}
-
-std::unique_ptr<ImageSet> ImageLoader::load() const
-{
-    auto ret = std::make_unique<ImageSet>();
-
-    std::vector<std::filesystem::path> dicomDirectoryEntries;
     for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(m_Folder))
     {
         const auto currentPath = dirEntry.path();
@@ -31,19 +24,24 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             continue;
         }
 
-        dicomDirectoryEntries.push_back(currentPath);
+        m_DicomDirectoryEntries.push_back(currentPath);
     }
+}
 
-    ret->m_HounsfieldData.resize(512 * 512 * dicomDirectoryEntries.size());
-    ret->getPostProcessedData().resize(512 * 512 * dicomDirectoryEntries.size());
-    ret->m_Slices.resize(dicomDirectoryEntries.size());
+std::unique_ptr<ImageSet> ImageLoader::load(std::function<void()> callback)
+{
+    auto ret = std::make_unique<ImageSet>();
+
+    ret->m_HounsfieldData.resize(512 * 512 * m_DicomDirectoryEntries.size());
+    ret->getPostProcessedData().resize(512 * 512 * m_DicomDirectoryEntries.size());
+    ret->m_Slices.resize(m_DicomDirectoryEntries.size());
 
     std::vector<std::unique_ptr<Slice>> tempDicomImages;
-    tempDicomImages.resize(dicomDirectoryEntries.size());
+    tempDicomImages.resize(m_DicomDirectoryEntries.size());
     const auto dicomCreationLambda = [&](const uint32_t threadID) {
-        for (uint32_t iter = threadID; iter < dicomDirectoryEntries.size(); iter += m_MaxThreads)
+        for (uint32_t iter = threadID; iter < m_DicomDirectoryEntries.size(); iter += m_MaxThreads)
         {
-            const auto& currentPath = dicomDirectoryEntries[iter];
+            const auto& currentPath = m_DicomDirectoryEntries[iter];
             auto slice = std::make_unique<Slice>(currentPath.string().c_str());
             if (!slice->m_DicomImage.isMonochrome())
             {
@@ -150,6 +148,12 @@ std::unique_ptr<ImageSet> ImageLoader::load() const
             memcpy(&ret->getPostProcessedData()[width * height * iter], postProcessed.data(), width * height * sizeof(float));
 
             ret->m_Slices[iter] = std::move(currentSlice);
+
+            if (callback)
+            {
+                std::lock_guard lock(m_Mutex);
+                callback();
+            }
         }
     };
 

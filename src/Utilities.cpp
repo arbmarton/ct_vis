@@ -80,56 +80,13 @@ std::vector<float> normalizeVector(const std::vector<float>& vec)
     return normalizedVec;
 }
 
-GLuint textureFromDicomImage(Slice* img)
-{
-    OpenGLLockGuard lock;
-
-    const uint8_t* data = static_cast<const uint8_t*>(img->m_DicomImage.getOutputData(8));
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-    if (data)
-    {
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, img->m_DicomImage.getWidth(), img->m_DicomImage.getHeight(), 0, GL_RED, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: "
-                  << "\n";
-    }
-    return textureID;
-}
-
-GLuint generateDataTexture(const uint32_t width, const uint32_t height)
-{
-    OpenGLLockGuard lock;
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    return textureID;
-}
-
 GLuint texture3DFromData(const std::vector<uint8_t>& vec)
 {
     OpenGLLockGuard lock;
+#ifdef QT_BUILD
+    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
+    QOpenGLExtraFunctions* f2 = QOpenGLContext::currentContext()->extraFunctions();
+#endif
 
     const uint8_t* data = vec.data();
 
@@ -138,6 +95,17 @@ GLuint texture3DFromData(const std::vector<uint8_t>& vec)
 
     if (data)
     {
+#ifdef QT_BUILD
+        f->glBindTexture(GL_TEXTURE_3D, textureID);
+        f2->glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, 512, 512, GLsizei(vec.size() / (512 * 512)), 0, GL_RED, GL_UNSIGNED_BYTE, data);
+        f->glGenerateMipmap(GL_TEXTURE_3D);
+
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#else
         glBindTexture(GL_TEXTURE_3D, textureID);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RED, 512, 512, GLsizei(vec.size() / (512 * 512)), 0, GL_RED, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_3D);
@@ -147,6 +115,7 @@ GLuint texture3DFromData(const std::vector<uint8_t>& vec)
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
     }
     else
     {
@@ -159,6 +128,10 @@ GLuint texture3DFromData(const std::vector<uint8_t>& vec)
 GLuint texture3DFromData(const std::vector<float>& vec)
 {
     OpenGLLockGuard lock;
+#ifdef QT_BUILD
+    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
+    QOpenGLExtraFunctions* f2 = QOpenGLContext::currentContext()->extraFunctions();
+#endif
 
     const float* data = vec.data();
 
@@ -167,6 +140,17 @@ GLuint texture3DFromData(const std::vector<float>& vec)
 
     if (data)
     {
+#ifdef QT_BUILD
+        f->glBindTexture(GL_TEXTURE_3D, textureID);
+        f2->glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 512, 512, GLsizei(vec.size() / (512 * 512)), 0, GL_RED, GL_FLOAT, data);
+        f->glGenerateMipmap(GL_TEXTURE_3D);
+
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        f->glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#else
         glBindTexture(GL_TEXTURE_3D, textureID);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 512, 512, GLsizei(vec.size() / (512 * 512)), 0, GL_RED, GL_FLOAT, data);
         glGenerateMipmap(GL_TEXTURE_3D);
@@ -176,6 +160,7 @@ GLuint texture3DFromData(const std::vector<float>& vec)
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+#endif
     }
     else
     {

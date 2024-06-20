@@ -20,8 +20,8 @@ public:
         const float zLevel,
         const glm::vec3& color);
 
-    void onScroll(const float yOffset, const glm::vec3& sliceSpacings);
-    void onMouseMove(const float xOffset, const float yOffset);
+    void onScroll(const float yOffset, const float speed, const float controlPressed, const glm::vec3& sliceSpacings);
+    void onMouseMove(const float xOffset, const float yOffset, const bool leftMousePressed, const bool middleMousePressed);
     const FloatFramebuffer& getDataFrameBuffer() const
     {
         return m_Databuffer;

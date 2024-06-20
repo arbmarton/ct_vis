@@ -23,6 +23,10 @@
 Shader::Shader(const ShaderType type)
     : m_Type(type)
 {
+#ifdef QT_BUILD
+    initializeOpenGLFunctions();
+#endif
+
     const std::string shaderName = shaderTypeToString(type);
 
     const auto vertex = utils::getShaderPath(shaderName).string().append(".vs");
@@ -191,91 +195,97 @@ std::unordered_map<std::string, std::string> Shader::getShaderVariables() const
     return ret;
 }
 
-void Shader::setBool(const std::string& name, const bool value) const
+void Shader::use()
+{
+    glUseProgram(m_ID);
+    setValues();
+}
+
+void Shader::setBool(const std::string& name, const bool value)
 {
     glUniform1i(glGetUniformLocation(m_ID, name.c_str()), (int)value);
 }
 
-void Shader::setInt(const std::string& name, const int value) const
+void Shader::setInt(const std::string& name, const int value)
 {
     glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value);
 }
 
-void Shader::setFloat(const std::string& name, const float value) const
+void Shader::setFloat(const std::string& name, const float value)
 {
     glUniform1f(glGetUniformLocation(m_ID, name.c_str()), value);
 }
 
-void Shader::setFloatArray(const std::string& name, const size_t count, const float* value) const
+void Shader::setFloatArray(const std::string& name, const size_t count, const float* value)
 {
     glUniform1fv(glGetUniformLocation(m_ID, name.c_str()), int(count), value);
 }
 
-void Shader::setMat3(const std::string& name, const glm::mat3& mat) const
+void Shader::setMat3(const std::string& name, const glm::mat3& mat)
 {
     glUniformMatrix3fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
+void Shader::setMat4(const std::string& name, const glm::mat4& mat)
 {
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void Shader::setMat4Array(const std::string& name, const std::vector<glm::mat4>& vec) const
+void Shader::setMat4Array(const std::string& name, const std::vector<glm::mat4>& vec)
 {
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), int(vec.size()), GL_FALSE, glm::value_ptr(vec[0]));
 }
 
-void Shader::setVec4(const std::string& name, const float x, const float y, const float z, const float w) const
+void Shader::setVec4(const std::string& name, const float x, const float y, const float z, const float w)
 {
     glUniform4f(glGetUniformLocation(m_ID, name.c_str()), x, y, z, w);
 }
 
-void Shader::setVec4(const std::string& name, const glm::vec4& vec) const
+void Shader::setVec4(const std::string& name, const glm::vec4& vec)
 {
     glUniform4fv(glGetUniformLocation(m_ID, name.c_str()), 1, &vec[0]);
 }
 
-void Shader::setVec3(const std::string& name, const float x, const float y, const float z) const
+void Shader::setVec3(const std::string& name, const float x, const float y, const float z)
 {
     glUniform3f(glGetUniformLocation(m_ID, name.c_str()), x, y, z);
 }
 
-void Shader::setVec3(const std::string& name, const glm::vec3& vec) const
+void Shader::setVec3(const std::string& name, const glm::vec3& vec)
 {
     glUniform3fv(glGetUniformLocation(m_ID, name.c_str()), 1, &vec[0]);
 }
 
-void Shader::setVec2(const std::string& name, const float x, const float y) const
+void Shader::setVec2(const std::string& name, const float x, const float y)
 {
     glUniform2f(glGetUniformLocation(m_ID, name.c_str()), x, y);
 }
 
-void Shader::setVec2(const std::string& name, const glm::vec2& vec) const
+void Shader::setVec2(const std::string& name, const glm::vec2& vec)
 {
     glUniform2fv(glGetUniformLocation(m_ID, name.c_str()), 1, &vec[0]);
 }
 
-void CtViewportShader::setValues() const
+void CtViewportShader::setValues()
 {
     setInt("texture3D", 0);
     setVec3("upVector", Renderer::UP_DIR);
 }
 
-void CtViewportPostprocessShader::setValues() const
+void CtViewportPostprocessShader::setValues()
 {
     setInt("textureInput", 0);
     setVec3("upVector", Renderer::UP_DIR);
 }
 
-void MainViewportShader::setValues() const
+void MainViewportShader::setValues()
 {
     setInt("viewport1", 0);
     setInt("viewport2", 1);
     setInt("viewport3", 2);
 }
 
-void GaussianBlurShader::setValues() const
+void GaussianBlurShader::setValues()
 {
     setInt("screenTexture", 0);
 }

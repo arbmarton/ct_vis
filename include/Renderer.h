@@ -3,7 +3,6 @@
 #include "Viewport.h"
 #include "ImageSet.h"
 
-#include "glad/glad.h"
 
 #include <cinttypes>
 #include <limits>
@@ -11,7 +10,20 @@
 #include <vector>
 #include <memory>
 
+#ifdef QT_BUILD
+#include <QOpenGlFunctions>
+#include <QOpenGlExtraFunctions>
+#else
+#pragma warning(push)
+#pragma warning(disable : 4005)
+#include "glad/glad.h"
+#pragma warning(pop)
+#endif
+
 class Renderer
+#ifdef QT_BUILD
+    : protected QOpenGLExtraFunctions
+#endif
 {
 public:
     static Renderer& instance();
@@ -26,6 +38,9 @@ public:
 #ifdef __APPLE__
     constexpr static uint32_t RENDER_WIDTH = uint32_t(512 * 2);
     constexpr static uint32_t RENDER_HEIGHT = uint32_t(512 * 2);
+#elif QT_BUILD
+    constexpr static uint32_t RENDER_WIDTH = uint32_t(1024);
+    constexpr static uint32_t RENDER_HEIGHT = uint32_t(1024);
 #else
     constexpr static uint32_t RENDER_WIDTH = uint32_t(512 * 3.6);
     constexpr static uint32_t RENDER_HEIGHT = uint32_t(512 * 3.6);
@@ -33,11 +48,16 @@ public:
     const static glm::vec3 UP_DIR;
 
     void draw();
-    void onScroll(const float yOffset);
-    void onMouseMove(const float xPos, const float yPos);
+    void onScroll(const float yOffset, const float speed, const bool controlPressed);
+    void onMouseMove(const float xPos, const float yPos, const bool leftMousePressed, const bool middleMousePressed);
     void onMouseButton(const int button, const int action, const int mods);
 
     void setImageSet(std::unique_ptr<ImageSet> imgset);
+
+    std::optional<float> getLastHoveredValue() const
+    {
+        return m_LastHoveredValue;
+    }
 
 private:
     Renderer();
@@ -51,9 +71,9 @@ private:
     std::optional<float> getHounsfieldFromSamplingPosition(const glm::vec3& v) const;
     Slice* getSliceFromSamplingPosition(const glm::vec3& v) const;
 
-    constexpr static float m_QuadVertices[] = {
-        // positions + texcoords
-        -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f
+    constexpr static float m_QuadVertices[] = { // positions + texcoords
+                                                -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
+                                                -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f
     };
     GLuint m_QuadVAO;
     GLuint m_QuadVBO;
