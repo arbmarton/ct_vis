@@ -73,8 +73,8 @@ void MainWindow::onOpenNewFolder()
 {
     QSettings settings("HeartToHeart", "CtVis");
     const auto recentList = settings.value("recentFolders").toStringList();
-    const auto mostRecent = recentList.last();
 
+    const auto mostRecent = recentList.count() > 0 ? recentList.last() : "";
     const auto selectedFolder = QFileDialog::getExistingDirectory(nullptr, "Open a folder containing DICOM files", mostRecent, QFileDialog::DontResolveSymlinks);
 
     if (selectedFolder.isEmpty())
