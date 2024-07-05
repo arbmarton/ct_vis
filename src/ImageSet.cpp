@@ -133,5 +133,9 @@ float ImageSet::getZSpacing() const
 
 glm::vec3 ImageSet::getSpacingVector() const
 {
+#ifdef __APPLE__
+    return { 1.0f, getYSpacing() / getXSpacing(), getZSpacing() / (getXSpacing() * 2.0) }; // WHY?????
+#else
     return { 1.0f, getYSpacing() / getXSpacing(), getZSpacing() / getXSpacing() };
+#endif
 }
