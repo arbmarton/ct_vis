@@ -33,6 +33,9 @@ Renderer& Renderer::instance()
 
 Renderer::Renderer()
 {
+#ifdef QT_BUILD
+    initializeOpenGLFunctions();
+#endif
     OpenGLLockGuard lock;
 
     glEnable(GL_DEPTH_TEST);
@@ -54,24 +57,24 @@ Renderer::Renderer()
 
     m_NextPostProcessFrameBuffer = &m_PostProcessFrameBuffer1;
 
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(Globals::instance().getOpenGLContext(), true);
-    ImGui_ImplOpenGL3_Init(OpenGlInfo::getVersionString().data());
+    //ImGui::CreateContext();
+    //ImGui::StyleColorsDark();
+    //ImGui_ImplGlfw_InitForOpenGL(Globals::instance().getOpenGLContext(), true);
+    //ImGui_ImplOpenGL3_Init(OpenGlInfo::getVersionString().data());
 }
 
 Renderer::~Renderer()
 {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+    //ImGui_ImplOpenGL3_Shutdown();
+    //ImGui_ImplGlfw_Shutdown();
+    //ImGui::DestroyContext();
 }
 
 void Renderer::draw()
 {
-    if (m_3DTexture == std::numeric_limits<GLuint>::max())
+    if (!m_ImageSet)
     {
-        throw 0;
+        return;
     }
 
     if (m_NeedUpload)
@@ -191,8 +194,10 @@ void Renderer::draw()
 #ifdef __APPLE__  // TODO: check properly for a retina display somehow
     // Retina bullshit need to be taken into account when rendering into the backbuffer...
     glViewport(0, 0, RENDER_WIDTH * 2, RENDER_HEIGHT * 2);
+#elif QT_BUILD
+    glViewport(0, 0, int(RENDER_WIDTH * 1.5), int(RENDER_HEIGHT * 1.5));
 #else
-    glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);
+    glViewport(0, 0, RENDER_WIDTH, RENDER_HEIGHT);  // monitor scaling is accounted for in Qt?
 #endif
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -210,19 +215,31 @@ void Renderer::draw()
     glBindVertexArray(m_QuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
+#ifndef QT_BUILD
     drawImGui();
+#endif
 }
 
-void Renderer::onScroll(const float yOffset)
+void Renderer::onScroll(const float yOffset, const float speed, const bool controlPressed)
 {
+    if (!m_ImageSet)
+    {
+        return;
+    }
+
     if (auto viewport = getViewportFromMousePosition())
     {
-        viewport->onScroll(yOffset, m_ImageSet->getSpacingVector());
+        viewport->onScroll(yOffset, speed, controlPressed, m_ImageSet->getSpacingVector());
     }
 }
 
-void Renderer::onMouseMove(const float xPos, const float yPos)
+void Renderer::onMouseMove(const float xPos, const float yPos, const bool leftMousePressed, const bool middleMousePressed)
 {
+    if (!m_ImageSet)
+    {
+        return;
+    }
+
     static bool firstMouse = true;
 
     if (firstMouse)
@@ -241,7 +258,7 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
     m_CurrentViewport = getViewportFromMousePosition();
     if (m_CurrentViewport)
     {
-        m_CurrentViewport->onMouseMove(xOffset, yOffset);
+        m_CurrentViewport->onMouseMove(xOffset, yOffset, leftMousePressed, middleMousePressed);
 
         const auto samplingPos = calculateSamplingPositionFromMousePosition(m_CurrentViewport, xPos, yPos);
         m_LastHoveredValue = getHounsfieldFromSamplingPosition(samplingPos);
@@ -256,6 +273,11 @@ void Renderer::onMouseMove(const float xPos, const float yPos)
 
 void Renderer::onMouseButton(const int button, const int action, const int /*mods*/)
 {
+    if (!m_ImageSet)
+    {
+        return;
+    }
+
     if (button == GLFW_MOUSE_BUTTON_LEFT)
     {
         if (action == GLFW_PRESS)
@@ -349,6 +371,7 @@ const Viewport* Renderer::getViewportFromMousePosition() const
     return nullptr;
 }
 
+#ifndef QT_BUILD
 void Renderer::drawImGui()
 {
 #ifdef __APPLE__
@@ -449,6 +472,7 @@ void Renderer::drawImGui()
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+#endif
 
 void Renderer::uploadNew3DTexture()
 {

@@ -41,16 +41,16 @@ glm::vec3 Viewport::getForward() const
     return glm::normalize(glm::vec3(verticalRotation * horizontalRotation * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)));
 }
 
-void Viewport::onScroll(const float yOffset, const glm::vec3& sliceSpacings)
+void Viewport::onScroll(const float yOffset, const float speed, const float controlPressed, const glm::vec3& sliceSpacings)
 {
-    if (glfwGetKey(Globals::instance().getOpenGLContext(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    if (controlPressed)
     {
-        m_fov += yOffset * 0.02f * -1.0f;
+        m_fov += yOffset * (speed * 2) * -1.0f;
         m_fov = glm::clamp(m_fov, 0.5f, 1.5f);
     }
     else
     {
-        m_zLevel += yOffset * 0.01f;
+        m_zLevel += yOffset * speed;
 
         // finds the distance from a point in a box to the wall of the box
         // https://chatgpt.com/share/f1db0cd7-05a3-4528-910a-f4313ba6bd10
@@ -84,9 +84,9 @@ void Viewport::onScroll(const float yOffset, const glm::vec3& sliceSpacings)
     }
 }
 
-void Viewport::onMouseMove(const float xOffset, const float yOffset)
+void Viewport::onMouseMove(const float xOffset, const float yOffset, const bool leftMousePressed, const bool middleMousePressed)
 {
-    if (glfwGetMouseButton(Globals::instance().getOpenGLContext(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    if (leftMousePressed)
     {
         constexpr float speed = 0.001f;
         const auto offset = xOffset * getRight() * speed * -1.0f + yOffset * getUp() * speed * -1.0f;
@@ -95,7 +95,7 @@ void Viewport::onMouseMove(const float xOffset, const float yOffset)
 
         m_CenterOffset = glm::clamp(m_CenterOffset, -0.5f, 0.5f);
     }
-    else if (glfwGetMouseButton(Globals::instance().getOpenGLContext(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
+    else if (middleMousePressed)
     {
         constexpr float speed = 0.01f / 2;
         m_RotationHorizontal += xOffset * speed;

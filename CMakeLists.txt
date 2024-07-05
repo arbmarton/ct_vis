@@ -8,6 +8,14 @@ if (MSVC)
     set_source_files_properties("$ENV{OpenCV_DIR}/../../include/opencv2/core/types.hpp" PROPERTIES COMPILE_OPTIONS "/wd4127")
 endif()
 
+set(CMAKE_PREFIX_PATH $ENV{QT_DIR})
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
+find_package(Qt6 COMPONENTS OpenGLWidgets REQUIRED)
+
 if (APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-volatile")
     set(DCMTK_ENABLE_BUILTIN_DICTIONARY ON)
@@ -67,19 +75,33 @@ set(HEADER_FILES
 	include/Viewport.h
 )
 
+set(QT_HEADER_FILES
+	include/qt/MainWindow.h
+	include/qt/OpenGLWidget.h
+)
+
 set(SOURCE_FILES
 	src/BasicDraw.cpp
 	src/DataTransform.cpp
 	src/ImageLoader.cpp
 	src/ImageSet.cpp
 	src/Framebuffer.cpp
-	src/main.cpp
 	src/OpenGLMutex.cpp
 	src/Renderer.cpp
 	src/Shader.cpp
 	src/Slice.cpp
 	src/Utilities.cpp
 	src/Viewport.cpp
+)
+
+set(QT_SOURCE_FILES
+	src/qt/MainWindow.cpp
+	src/qt/OpenGLWidget.cpp
+	src/qt/main_qt.cpp
+)
+
+set(CMDLINE_SOURCE_FILES
+	src/cmdline/main_cmdline.cpp
 )
 
 set(SHADER_FILES
@@ -96,12 +118,29 @@ set(SHADER_FILES
 add_executable(${PROJECT_NAME}
 		       ${THIRDPARTY_HEADERS}
 			   ${THIRDPARTY_SOURCES}
-	           ${HEADER_FILES}
+			   ${HEADER_FILES}
 			   ${SOURCE_FILES}
 			   ${SHADER_FILES}
+			   ${CMDLINE_SOURCE_FILES}
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC
+add_executable(${PROJECT_NAME}_qt
+		       ${THIRDPARTY_HEADERS}
+			   ${THIRDPARTY_SOURCES}
+			   ${HEADER_FILES}
+			   ${SOURCE_FILES}
+			   ${SHADER_FILES}
+	           ${QT_HEADER_FILES}
+			   ${QT_SOURCE_FILES}
+)
+target_compile_definitions(${PROJECT_NAME}_qt PRIVATE QT_BUILD=1)
+target_include_directories(${PROJECT_NAME}_qt PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include/qt/)
+target_link_libraries(${PROJECT_NAME}_qt Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME}_qt Qt6::OpenGLWidgets)
+
+set(targets ${PROJECT_NAME}_qt ${PROJECT_NAME})
+foreach(target ${targets})
+target_include_directories(${target} PUBLIC
 						   ${CMAKE_CURRENT_LIST_DIR}/include/
 
 						   ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/config/include/
@@ -121,19 +160,19 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 if (APPLE)
-    target_include_directories(${PROJECT_NAME} PUBLIC
+    target_include_directories(${target} PUBLIC
                                "/opt/X11/include"
                                 ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad_macos/include/
                                 ${OpenCV_INCLUDE_DIRS}
     )
 else()
-    target_include_directories(${PROJECT_NAME} PUBLIC
+    target_include_directories(${target} PUBLIC
                                ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glad/include/
     )
 endif(APPLE)
 
 if (APPLE)
-    target_link_libraries(${PROJECT_NAME}
+    target_link_libraries(${target}
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/libdcmimgle.a
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/libdcmdata.a
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/libofstd.a
@@ -144,15 +183,15 @@ if (APPLE)
                           ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glfw-3.3/src/$<CONFIG>/libglfw3.a
                           ${CMAKE_CURRENT_LIST_DIR}/out/thirdparty/glad_macos/$<CONFIG>/libglad.a
     )
-    target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
-    target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
-    target_link_libraries(${PROJECT_NAME} OpenGL::GL)
-    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
-    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
-    target_link_libraries(${PROJECT_NAME} "-framework CoreVideo")
-    target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+    target_link_libraries(${target} ${X11_LIBRARIES})
+    target_link_libraries(${target} ${ZLIB_LIBRARIES})
+    target_link_libraries(${target} OpenGL::GL)
+    target_link_libraries(${target} "-framework Cocoa")
+    target_link_libraries(${target} "-framework IOKit")
+    target_link_libraries(${target} "-framework CoreVideo")
+    target_link_libraries(${target} ${OpenCV_LIBS})
 else()
-    target_link_libraries(${PROJECT_NAME}
+    target_link_libraries(${target}
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/dcmimgle.lib
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/dcmdata.lib
                           ${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/lib/$<CONFIG>/ofstd.lib
@@ -167,15 +206,17 @@ else()
     )
 endif()
 
+# Parallel compilation and C++17
+if(MSVC)
+target_compile_options(${target} PRIVATE "/Zc:__cplusplus")
+target_compile_options(${target} PRIVATE /std:c++20 /MP /W4 /wd4554 /WX)
+endif(MSVC)
+
+endforeach()
+
 source_group("shaders" FILES ${SHADER_FILES})
 source_group("thirdparty" FILES ${THIRDPARTY_HEADERS})
 source_group("thirdparty sources" FILES ${THIRDPARTY_SOURCES})
-
-# Parallel compilation and C++17
-if(MSVC)
-target_compile_options(${PROJECT_NAME} PRIVATE "/Zc:__cplusplus")
-target_compile_options(${PROJECT_NAME} PRIVATE /std:c++20 /MP /W4 /wd4554 /WX)
-endif(MSVC)
 
 if(WIN32)
 	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -185,6 +226,13 @@ if(WIN32)
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/bin/$<CONFIG>/oflog.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/thirdparty/dcmtk/build/bin/$<CONFIG>/oficonv.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "$ENV{OpenCV_DIR}/bin/opencv_world490$<$<CONFIG:Debug>:d>.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "$ENV{QT_DIR}/bin/Qt6Widgets$<$<CONFIG:Debug>:d>.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "$ENV{QT_DIR}/bin/Qt6Core$<$<CONFIG:Debug>:d>.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "$ENV{QT_DIR}/bin/Qt6Gui$<$<CONFIG:Debug>:d>.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "$ENV{QT_DIR}/bin/Qt6OpenGlWidgets$<$<CONFIG:Debug>:d>.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "$ENV{QT_DIR}/bin/Qt6OpenGl$<$<CONFIG:Debug>:d>.dll" "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/"
+		COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${PROJECT_NAME}>/platforms"
+		COMMAND ${CMAKE_COMMAND} -E copy_directory "$ENV{QT_DIR}/plugins/platforms" "$<TARGET_FILE_DIR:${PROJECT_NAME}>/platforms"
 		VERBATIM
 	)
 endif(WIN32)

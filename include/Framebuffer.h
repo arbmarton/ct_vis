@@ -1,10 +1,22 @@
 #pragma once
 
+#ifdef QT_BUILD
+#include <QOpenGlFunctions>
+#include <QOpenGlExtraFunctions>
+#else
+#pragma warning(push)
+#pragma warning(disable : 4005)
 #include "glad/glad.h"
+#pragma warning(pop)
+#endif
 
 #include <cinttypes>
 
+
 struct IFramebuffer
+#ifdef QT_BUILD
+    : protected QOpenGLExtraFunctions
+#endif
 {
     uint32_t m_Width;
     uint32_t m_Height;

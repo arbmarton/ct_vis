@@ -7,6 +7,9 @@
 Framebuffer::Framebuffer(const uint32_t width, const uint32_t height)
     : IFramebuffer()
 {
+#ifdef QT_BUILD
+    initializeOpenGLFunctions();
+#endif
     OpenGLLockGuard lock;
 
     m_Width = width;
@@ -41,6 +44,9 @@ Framebuffer::Framebuffer(const uint32_t width, const uint32_t height)
 FloatFramebuffer::FloatFramebuffer(const uint32_t width, const uint32_t height)
     : IFramebuffer()
 {
+#ifdef QT_BUILD
+    initializeOpenGLFunctions();
+#endif
     OpenGLLockGuard lock;
 
     m_Width = width;
@@ -75,6 +81,9 @@ FloatFramebuffer::FloatFramebuffer(const uint32_t width, const uint32_t height)
 ViewportFramebuffer::ViewportFramebuffer(const uint32_t width, const uint32_t height)
     : IFramebuffer()
 {
+#ifdef QT_BUILD
+    initializeOpenGLFunctions();
+#endif
     OpenGLLockGuard lock;
 
     m_Width = width;

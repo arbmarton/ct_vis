@@ -7,11 +7,15 @@
 #include "glm.hpp"
 #pragma warning(pop)
 
-#include <glad/glad.h>
-
 #include <filesystem>
 #include <unordered_map>
 #include <string_view>
+
+#ifdef QT_BUILD
+#include <QOpenGlFunctions>
+#else
+#include <glad/glad.h>
+#endif
 
 struct TextureUploadHelper
 {
@@ -21,6 +25,9 @@ struct TextureUploadHelper
 };
 
 class Shader
+#ifdef QT_BUILD
+    : protected QOpenGLFunctions
+#endif
 {
 public:
     Shader(const ShaderType type);
@@ -41,27 +48,23 @@ public:
         return m_TexturesToUpload;
     }
 
-    void use() const
-    {
-        glUseProgram(m_ID);
-        setValues();
-    }
+    void use();
 
-    void setBool(const std::string& name, const bool value) const;
-    void setInt(const std::string& name, const int value) const;
-    void setFloat(const std::string& name, const float value) const;
-    void setFloatArray(const std::string& name, const size_t count, const float* value) const;
-    void setMat3(const std::string& name, const glm::mat3& mat) const;
-    void setMat4(const std::string& name, const glm::mat4& mat) const;
-    void setMat4Array(const std::string& name, const std::vector<glm::mat4>& vec) const;
-    void setVec4(const std::string& name, const float x, const float y, const float z, const float w) const;
-    void setVec4(const std::string& name, const glm::vec4& vec) const;
-    void setVec3(const std::string& name, const float x, const float y, const float z) const;
-    void setVec3(const std::string& name, const glm::vec3& vec) const;
-    void setVec2(const std::string& name, const float x, const float y) const;
-    void setVec2(const std::string& name, const glm::vec2& vec) const;
+    void setBool(const std::string& name, const bool value);
+    void setInt(const std::string& name, const int value);
+    void setFloat(const std::string& name, const float value);
+    void setFloatArray(const std::string& name, const size_t count, const float* value);
+    void setMat3(const std::string& name, const glm::mat3& mat);
+    void setMat4(const std::string& name, const glm::mat4& mat);
+    void setMat4Array(const std::string& name, const std::vector<glm::mat4>& vec);
+    void setVec4(const std::string& name, const float x, const float y, const float z, const float w);
+    void setVec4(const std::string& name, const glm::vec4& vec);
+    void setVec3(const std::string& name, const float x, const float y, const float z);
+    void setVec3(const std::string& name, const glm::vec3& vec);
+    void setVec2(const std::string& name, const float x, const float y);
+    void setVec2(const std::string& name, const glm::vec2& vec);
 
-    virtual void setValues() const = 0;
+    virtual void setValues() = 0;
 
 protected:
     void loadInternal(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath, const std::filesystem::path& geometryPath = "");
@@ -90,7 +93,7 @@ public:
     {
     }
 
-    void setValues() const override
+    void setValues() override
     {
     }
 };
@@ -103,7 +106,7 @@ public:
     {
     }
 
-    void setValues() const override;
+    void setValues() override;
 };
 
 class CtViewportPostprocessShader : public Shader
@@ -114,7 +117,7 @@ public:
     {
     }
 
-    void setValues() const override;
+    void setValues() override;
 };
 
 class MainViewportShader : public Shader
@@ -125,7 +128,7 @@ public:
     {
     }
 
-    void setValues() const override;
+    void setValues() override;
 };
 
 class GaussianBlurShader : public Shader
@@ -136,5 +139,5 @@ public:
     {
     }
 
-    void setValues() const override;
+    void setValues() override;
 };

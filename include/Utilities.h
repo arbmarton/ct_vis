@@ -1,7 +1,5 @@
 #pragma once
 
-#include "glad/glad.h"
-
 #pragma warning(push)
 #pragma warning(disable : 4201)
 #include "glm.hpp"
@@ -11,6 +9,16 @@
 #include <string>
 #include <vector>
 #include <cinttypes>
+
+#ifdef QT_BUILD
+#include <QOpenGlFunctions>
+#include <QOpenGlExtraFunctions>
+#else
+#pragma warning(push)
+#pragma warning(disable : 4005)
+#include "glad/glad.h"
+#pragma warning(pop)
+#endif
 
 struct Slice;
 
@@ -52,8 +60,6 @@ std::pair<T, T> findMinimumAndMaximum(T* data, const size_t length)
 }
 
 std::vector<float> normalizeVector(const std::vector<float>& vec);
-GLuint textureFromDicomImage(Slice* img);
-GLuint generateDataTexture(const uint32_t width, const uint32_t height);
 GLuint texture3DFromData(const std::vector<uint8_t>& vec);
 GLuint texture3DFromData(const std::vector<float>& vec);
 std::vector<float> getTextureData(const GLuint id, const uint32_t width, const uint32_t height);
