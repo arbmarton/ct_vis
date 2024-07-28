@@ -91,6 +91,8 @@ public:
     glm::vec3 getUp() const;
     glm::mat3 getLocalTransform() const;
 
+    void centerOnPosition(const glm::vec3& pos, const glm::vec3& spacings);
+
 private:
     const uint32_t m_RenderWidth;
     const uint32_t m_RenderHeight;

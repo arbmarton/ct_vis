@@ -21,6 +21,7 @@ protected:
 
     void mouseMoveEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
 
 private:
     std::chrono::steady_clock::time_point m_LastTime = std::chrono::steady_clock::now();

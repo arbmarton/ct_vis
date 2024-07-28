@@ -50,7 +50,7 @@ public:
     void draw();
     void onScroll(const float yOffset, const float speed, const bool controlPressed);
     void onMouseMove(const float xPos, const float yPos, const bool leftMousePressed, const bool middleMousePressed);
-    void onMouseButton(const int button, const int action, const int mods);
+    void onMouseButton(const bool left, const bool pressed, const bool released, const bool shiftPressed);
 
     void setImageSet(std::unique_ptr<ImageSet> imgset);
 
@@ -64,6 +64,10 @@ private:
 
     Viewport* getViewportFromMousePosition();
     const Viewport* getViewportFromMousePosition() const;
+    std::vector<Viewport*> getAllViewports()
+    {
+        return std::vector({ &m_Viewport1, &m_Viewport2, &m_Viewport3 });
+    }
     void drawImGui();
     void uploadNew3DTexture();
     void swapPostProcessFrameBuffers();

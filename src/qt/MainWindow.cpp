@@ -141,5 +141,17 @@ void MainWindow::updateProgress()
 void MainWindow::onLoadingFinished()
 {
     Renderer::instance().setImageSet(std::move(m_ImageSet));
-    m_ImageSet = nullptr;
+
+    //m_ProgressDialog = new QProgressDialog("Uploading textures to GPU", "Cancel", 0, 1, this);
+    //m_ProgressDialog->setWindowModality(Qt::WindowModal);
+    //m_ProgressDialog->setAutoClose(true);
+    //m_ProgressDialog->show();
+    //
+    //std::thread thread([&]() {
+    //    Renderer::instance().setImageSet(std::move(m_ImageSet));
+    //    m_ImageSet = nullptr;
+    //});
+
+
+    //m_ProgressDialog->setValue(1);
 }

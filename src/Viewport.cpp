@@ -118,3 +118,15 @@ glm::mat3 Viewport::getLocalTransform() const
 {
     return glm::transpose(glm::mat3(getRight(), getUp(), glm::normalize(getForward())));
 }
+
+void Viewport::centerOnPosition(const glm::vec3& pos, const glm::vec3& spacings)
+{
+    // This equation most be held true
+    //const glm::vec3 center = glm::vec3(0.5, 0.5, 0.5) + m_CenterOffset + m_zLevel * getForward();
+    //const glm::vec3 diff = pos - center;
+    //const float dotproduct = glm::dot(getForward(), diff);
+
+    // re-arranging things: https://chatgpt.com/share/56ef6f90-170f-4dc4-b025-fcfbac71973a
+
+    m_zLevel = (glm::dot(getForward(), pos) - glm::dot(getForward(), glm::vec3(0.5, 0.5, 0.5)) - glm::dot(getForward(), m_CenterOffset)) / glm::dot(getForward(), getForward() / spacings);
+}

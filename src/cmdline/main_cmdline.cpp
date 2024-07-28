@@ -15,7 +15,7 @@
 #ifdef __APPLE__
 std::string folder = "/Users/marci/dev/ct_vis/dataset/3.000000-Recon 2 VENOGRAM AP-05356/";
 #else
-std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NACT-83628/2.000000-AX THN PORTAL-76848/";
+std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NA-CT-83628/2.000000-AX THN PORTAL-76848/";
 //const std::string folder =
 //"g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-00799/10-06-2008-NA-CT V ABDPEL-75914/3.000000Recon 2 VENOGRAM AP-05356/";
 //const std::string folder = "g:/medical_data/test/manifest-1692379830142/CPTAC-CCRCC/C3L-01459/02-12-2009-NACT-83628/test/";
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     glfwSetCursorPosCallback(context, [](GLFWwindow* window, double x, double y) { Renderer::instance().onMouseMove(float(x), float(y), glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); });
     glfwSetScrollCallback(context, [](GLFWwindow* window, double /*x*/, double y) { Renderer::instance().onScroll(float(y), 0.01f, glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)); });
     glfwSetMouseButtonCallback(
-        context, [](GLFWwindow* /*window*/, int button, int action, int mods) { Renderer::instance().onMouseButton(button, action, mods); });
+        context, [](GLFWwindow* window, int button, int action, int /*mods*/) { Renderer::instance().onMouseButton(button == GLFW_MOUSE_BUTTON_LEFT, action == GLFW_PRESS, action == GLFW_RELEASE, glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)); });
 
     Renderer::instance().setImageSet(ImageLoader(folder, 12).load());
 

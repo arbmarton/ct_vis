@@ -57,17 +57,21 @@ Renderer::Renderer()
 
     m_NextPostProcessFrameBuffer = &m_PostProcessFrameBuffer1;
 
-    //ImGui::CreateContext();
-    //ImGui::StyleColorsDark();
-    //ImGui_ImplGlfw_InitForOpenGL(Globals::instance().getOpenGLContext(), true);
-    //ImGui_ImplOpenGL3_Init(OpenGlInfo::getVersionString().data());
+#ifndef QT_BUILD
+    ImGui::CreateContext();
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(Globals::instance().getOpenGLContext(), true);
+    ImGui_ImplOpenGL3_Init(OpenGlInfo::getVersionString().data());
+#endif
 }
 
 Renderer::~Renderer()
 {
-    //ImGui_ImplOpenGL3_Shutdown();
-    //ImGui_ImplGlfw_Shutdown();
-    //ImGui::DestroyContext();
+#ifndef QT_BUILD
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+#endif
 }
 
 void Renderer::draw()
@@ -271,20 +275,38 @@ void Renderer::onMouseMove(const float xPos, const float yPos, const bool leftMo
     }
 }
 
-void Renderer::onMouseButton(const int button, const int action, const int /*mods*/)
+void Renderer::onMouseButton(const bool left, const bool pressed, const bool released, const bool shiftPressed)
 {
     if (!m_ImageSet)
     {
         return;
     }
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    if (left)
     {
-        if (action == GLFW_PRESS)
+        if (shiftPressed)
+        {
+            if (auto viewport = getViewportFromMousePosition())
+            {
+                const auto samplingPos = calculateSamplingPositionFromMousePosition(m_CurrentViewport, m_LastMouseX, m_LastMouseY);
+
+                const auto allViewPorts = getAllViewports();
+                std::vector<Viewport*> selectedViewports;
+                for (const auto v : allViewPorts)
+                {
+                    if (v != viewport)
+                    {
+                        selectedViewports.push_back(v);
+                        v->centerOnPosition(samplingPos, m_ImageSet->getSpacingVector());
+                    }
+                }
+            }
+        }
+        if (pressed)
         {
             m_MousePressed = true;
         }
-        else if (action == GLFW_RELEASE)
+        else if (released)
         {
             m_MousePressed = false;
         }

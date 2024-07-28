@@ -57,6 +57,14 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
     update();
 }
 
+void OpenGLWidget::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton && event->modifiers() & Qt::ShiftModifier) {
+        Renderer::instance().onMouseButton(true, true, false, true);
+    }
+    update();
+}
+
 void OpenGLWidget::wheelEvent(QWheelEvent* event)
 {
     Renderer::instance().onScroll(float(event->angleDelta().y()), 0.0001f, event->modifiers() & Qt::ControlModifier);
